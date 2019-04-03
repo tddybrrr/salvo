@@ -65,7 +65,7 @@ public class SalvoController {
 
         Map<String, Object> finalMapOfGames = new HashMap<>();
 
-        finalMapOfGames.put("games!", gamesObject);
+        finalMapOfGames.put("games", gamesObject);
 
         return finalMapOfGames;
     }
