@@ -1,5 +1,6 @@
 package com.example.salvo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -8,47 +9,43 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.FetchType;
+import java.time.LocalDateTime;
+
 import java.util.Set;
 
 @Entity
-public class Player {
+public class Game {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     private long id;
-    private String firstName;
 
-
-    @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
 
-    public Player() {
-    }
+    private LocalDateTime gameTime =  LocalDateTime.now();
 
-    public Player(String first) {
-        this.firstName = first;
-
-    }
+    public Game() { }
 
     public void addGamePlayer(GamePlayer gamePlayer) {
-        gamePlayer.setPlayer(this);
+        gamePlayer.setGame(this);
         gamePlayers.add(gamePlayer);
     }
 
+    @JsonIgnore
     public Set<GamePlayer> getGamePlayers() {
         return gamePlayers;
     }
 
-    public String getFirstName() {
-        return firstName;
+
+    public LocalDateTime getGameTime() {
+        return gameTime;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setGameTime(LocalDateTime gameTime) {
+        this.gameTime = gameTime;
     }
-
-
 
     public long getId() {
         return id;
@@ -58,7 +55,8 @@ public class Player {
         this.id = id;
     }
 
+    @Override
     public String toString() {
-        return firstName;
+        return id + " " + gameTime;
     }
 }
