@@ -1,6 +1,7 @@
 package com.example.salvo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,7 +45,7 @@ public class SalvoController {
 
                     playerRepo.findAll().stream().forEach(eachPlayer -> {
 
-                        if (eachGP.getPlayer().getFirstName() == eachPlayer.getFirstName() ){
+                        if (eachGP.getPlayer().getFirstName() == eachPlayer.getFirstName()) {
                             playersMap.put("playerName", eachPlayer.getFirstName());
                             playersMap.put("playerID", eachPlayer.getId());
                             playersObj.add(playersMap);
@@ -87,4 +88,35 @@ public class SalvoController {
 
         return playerMap;
     }
+
+
+    @RequestMapping("/game_view/{gameID}")
+    public Map<String, Object> gameView(@PathVariable long gameID) {
+
+        List<Object> gameOBJ = new ArrayList<>();
+
+        gameRepo.findAll().stream().forEach(game -> {
+
+
+            if (game.getId() == gameID) {
+                game.getGamePlayers().stream().forEach(gamePlayer -> {
+                    Map<String, Object> gpMap = new HashMap<>();
+                    gpMap.put("gpID", gamePlayer.getId());
+                    gpMap.put("playerID", gamePlayer.getPlayer().getId());
+                    gpMap.put("playerName", gamePlayer.getPlayer().getFirstName());
+                    gameOBJ.add(gpMap);
+                });
+
+            }
+
+        });
+
+        Map<String, Object> playerMap = new HashMap<>();
+
+        playerMap.put("GamePlayersInThisGame", gameOBJ);
+
+        return playerMap;
+    }
 }
+
+

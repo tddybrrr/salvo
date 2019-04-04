@@ -8,10 +8,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+import java.util.Set;
+import java.util.HashSet;
+
+
 
 @Entity
 public class GamePlayer {
@@ -29,6 +34,9 @@ public class GamePlayer {
     @JoinColumn(name="game_id")
     private Game game;
 
+    @OneToMany(mappedBy="gamePlayer", fetch=FetchType.EAGER)
+    Set<Ship> ships = new HashSet<>();
+
     private LocalDateTime gameTime =  LocalDateTime.now();
 
     public GamePlayer(){
@@ -38,6 +46,12 @@ public class GamePlayer {
         this.game = game;
         this.player = player;
     }
+
+    public void addShip(Ship ship) {
+        ship.setGamePlayer(this);
+        ships.add(ship);
+    }
+
 
     public long getId() {
         return id;
@@ -56,6 +70,11 @@ public class GamePlayer {
         this.player = player;
     }
 
+
+    public Set<Ship> getShips() {
+        return ships;
+    }
+
     public Game getGame() {
         return game;
     }
@@ -72,13 +91,18 @@ public class GamePlayer {
         this.gameTime = gameTime;
     }
 
+    public void setShips(Set<Ship> ships) {
+        this.ships = ships;
+    }
+
     @Override
     public String toString() {
         return "GamePlayer{" +
                 "id=" + id +
-                ", player=" + player +
-                ", game=" + game +
-                ", gameTime=" + gameTime +
+                ", player=" + this.player +
+                ", game=" + this.game +
+                ", ships=" + this.ships +
+                ", gameTime=" + this.gameTime +
                 '}';
     }
 }
