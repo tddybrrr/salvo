@@ -93,29 +93,37 @@ public class SalvoController {
     @RequestMapping("/game_view/{gameID}")
     public Map<String, Object> gameView(@PathVariable long gameID) {
 
-        List<Object> gameOBJ = new ArrayList<>();
+        List<Object> playersInGameObject = new ArrayList<>();
+        Map<String, Object> gamePlayersMap = new HashMap<>();
 
         gameRepo.findAll().stream().forEach(game -> {
-
-
             if (game.getId() == gameID) {
                 game.getGamePlayers().stream().forEach(gamePlayer -> {
-                    Map<String, Object> gpMap = new HashMap<>();
-                    gpMap.put("gpID", gamePlayer.getId());
-                    gpMap.put("playerID", gamePlayer.getPlayer().getId());
-                    gpMap.put("playerName", gamePlayer.getPlayer().getFirstName());
-                    gameOBJ.add(gpMap);
+                    Map<String, Object> singleGamePlayerMap = new HashMap<>();
+                    singleGamePlayerMap.put("gpID", gamePlayer.getId());
+                    singleGamePlayerMap.put("playerID", gamePlayer.getPlayer().getId());
+                    singleGamePlayerMap.put("playerName", gamePlayer.getPlayer().getFirstName());
+                    singleGamePlayerMap.put("ships", getShipsfromGamePlayer(gamePlayer));
+                    playersInGameObject.add(singleGamePlayerMap);
                 });
-
+                gamePlayersMap.put("gameID", game.getId());
             }
-
         });
 
-        Map<String, Object> playerMap = new HashMap<>();
+        gamePlayersMap.put("GamePlayersInThisGame", playersInGameObject);
 
-        playerMap.put("GamePlayersInThisGame", gameOBJ);
+        return gamePlayersMap;
+    }
 
-        return playerMap;
+    public List<Object> getShipsfromGamePlayer(GamePlayer singleGP){
+        List<Object> shipsObj = new ArrayList<>();
+        singleGP.getShips().stream().forEach(ship -> {
+            Map<String, Object> ships = new HashMap<>();
+            ships.put("location",ship.getlocation());
+            ships.put("type", ship.getShipType());
+            shipsObj.add(ships);
+        });
+        return shipsObj;
     }
 }
 

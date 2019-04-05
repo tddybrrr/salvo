@@ -1,0 +1,23 @@
+th, td, tr {
+border: solid 1px black;
+}
+
+
+body{
+
+text-align: center;
+}
+
+tableWrapper{
+
+display: flex;
+}
+
+table{
+margin: auto;
+width: 50%;
+}
+
+hr{
+border-color: red;
+}

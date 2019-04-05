@@ -1,4 +1,5 @@
 
+
 function fillRows(games){
 
     var row = document.getElementById("list")
@@ -17,9 +18,8 @@ fetch( "http://localhost:8080/api/games").then(function(response) {
   // signal a server error to the chain
   throw new Error(response.statusText);
 }).then(function(json) {
-
+    console.log(json)
     fillRows(json.games)
-
 }).catch(function(error) {
   // called when an error occurs anywhere in the chain
   console.log( "Request failed: " + error.message );

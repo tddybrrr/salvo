@@ -52,7 +52,6 @@ public class GamePlayer {
         ships.add(ship);
     }
 
-
     public long getId() {
         return id;
     }
@@ -69,7 +68,6 @@ public class GamePlayer {
     public void setPlayer(Player player) {
         this.player = player;
     }
-
 
     public Set<Ship> getShips() {
         return ships;
