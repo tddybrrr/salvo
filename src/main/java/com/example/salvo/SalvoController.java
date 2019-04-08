@@ -90,6 +90,24 @@ public class SalvoController {
     }
 
 
+    @RequestMapping("/gp_view/{gpID}")
+    public Map<String, Object> gpView(@PathVariable long gpID){
+
+        Map<String, Object> gamePlayerMap = new HashMap<>();
+        List<Object> gpOBJ = new ArrayList<>();
+
+        gamePlayerMap.put("gpID", gpRepo.getOne(gpID).getId());
+        gamePlayerMap.put("realName", gpRepo.getOne(gpID).getPlayer().getFirstName());
+        gamePlayerMap.put("ships", getShipsfromGamePlayer(gpRepo.getOne(gpID)));
+        gpOBJ.add(gamePlayerMap);
+
+        Map<String, Object> idk = new HashMap<>();
+        idk.put("game_player", gpOBJ);
+        return gamePlayerMap;
+    }
+
+
+
     @RequestMapping("/game_view/{gameID}")
     public Map<String, Object> gameView(@PathVariable long gameID) {
 
