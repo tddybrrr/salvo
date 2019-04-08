@@ -24,28 +24,32 @@ public class SalvoApplication {
             Player p1 = new Player("Jack");
             Player p2 = new Player("Chloe");
             Player p3 = new Player("Kim");
-            Player p4 = new Player("Ottavia");
 
             playersRepo.save(p1);
             playersRepo.save(p2);
             playersRepo.save(p3);
-            playersRepo.save(p4);
 
             Game g1 = new Game();
             Game g2 = new Game();
+            Game g3 = new Game();
 
             gamesRepo.save(g1);
             gamesRepo.save(g2);
+            gamesRepo.save(g3);
 
             GamePlayer gp1 = new GamePlayer(g1, p1);
             GamePlayer gp2 = new GamePlayer(g1, p2);
             GamePlayer gp3 = new GamePlayer(g2, p3);
             GamePlayer gp4 = new GamePlayer(g2, p1);
+            GamePlayer gp5 = new GamePlayer(g3, p2);
+            GamePlayer gp6 = new GamePlayer(g3, p3);
 
             gamePlayerRepo.save(gp1);
             gamePlayerRepo.save(gp2);
             gamePlayerRepo.save(gp3);
             gamePlayerRepo.save(gp4);
+            gamePlayerRepo.save(gp5);
+            gamePlayerRepo.save(gp6);
 
 
             Ship ship1 = new Ship("destroyer");
@@ -66,17 +70,33 @@ public class SalvoApplication {
             Ship ship6 = new Ship("tank");
             ship6.setlocation((Arrays.asList("c5", "c6", "c7")));
 
-
             Ship ship7 = new Ship("nuke");
             ship7.setlocation((Arrays.asList("d4", "e4", "f4")));
 
+            Ship ship8 = new Ship("submarine");
+            ship8.setlocation((Arrays.asList("e5", "f5", "g5")));
+
+            Ship ship9 = new Ship("aircraft");
+            ship9.setlocation((Arrays.asList("d7", "e7", "f7")));
+
+            Ship ship10 = new Ship("aircraft");
+            ship10.setlocation((Arrays.asList("g4", "g5", "g6")));
+
             gp1.addShip(ship1);
             gp1.addShip(ship2);
+
             gp2.addShip(ship3);
             gp2.addShip(ship4);
+
             gp3.addShip(ship5);
             gp3.addShip(ship6);
+
             gp4.addShip(ship7);
+            gp4.addShip(ship8);
+
+            gp5.addShip(ship9);
+            gp6.addShip(ship10);
+
 
             shipsRepo.save(ship1);
             shipsRepo.save(ship2);
@@ -85,6 +105,9 @@ public class SalvoApplication {
             shipsRepo.save(ship5);
             shipsRepo.save(ship6);
             shipsRepo.save(ship7);
+            shipsRepo.save(ship8);
+            shipsRepo.save(ship9);
+            shipsRepo.save(ship10);
 
 
 
