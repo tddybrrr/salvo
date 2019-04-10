@@ -1,23 +1,42 @@
+
+
 th, td, tr {
-border: solid 1px black;
+    border: solid 1px black;
 }
 
 
 body{
-
-text-align: center;
+    text-align: center;
 }
 
 tableWrapper{
-
-display: flex;
+    display: flex;
 }
 
-table{
-margin: auto;
-width: 50%;
+#mainTable{
+    margin: auto;
+    width: 50%;
 }
 
 hr{
-border-color: red;
+    border-color: red;
 }
+
+#games, #daGrids{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content; center;
+}
+
+#gp1Grid > table {
+    width: 450px;
+    height: 450px;
+}
+
+ #gp2Grid > table, #myGrid, #whereIveShot {
+    width: 450px;
+    height: 450px;
+ }
+
