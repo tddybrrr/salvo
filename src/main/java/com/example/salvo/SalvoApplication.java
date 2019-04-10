@@ -4,10 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @SpringBootApplication
 public class SalvoApplication {
@@ -18,7 +15,7 @@ public class SalvoApplication {
 
     @Bean
     public CommandLineRunner initData(PlayerRepository playersRepo, GameRepository gamesRepo, GamePlayerRepository gamePlayerRepo,
-                                      ShipRepository shipsRepo) {
+                                      ShipRepository shipsRepo, SalvoRepository salvoeRepo) {
         return (args) -> {
 
             Player p1 = new Player("Jack");
@@ -97,6 +94,36 @@ public class SalvoApplication {
             gp5.addShip(ship9);
             gp6.addShip(ship10);
 
+            Salvo salv1 = new Salvo(1);
+            salv1.setlocation((Arrays.asList("e4", "d7")));
+            gp1.addSalvo(salv1);
+
+            Salvo salv2 = new Salvo(1);
+            salv2.setlocation((Arrays.asList("h1", "e2")));
+            gp2.addSalvo(salv2);
+
+            Salvo salv3 = new Salvo(2);
+            salv3.setlocation((Arrays.asList("h1", "d3")));
+            gp1.addSalvo(salv3);
+
+            Salvo salv4 = new Salvo(2);
+            salv4.setlocation((Arrays.asList("f7", "f8")));
+            gp2.addSalvo(salv4);
+
+            Salvo salv5 = new Salvo(3);
+            salv5.setlocation((Arrays.asList("a4", "e6")));
+            gp1.addSalvo(salv5);
+
+            Salvo salv6 = new Salvo(3);
+            salv6.setlocation((Arrays.asList("d2", "d8")));
+            gp2.addSalvo(salv6);
+
+            salvoeRepo.save(salv1);
+            salvoeRepo.save(salv2);
+            salvoeRepo.save(salv3);
+            salvoeRepo.save(salv4);
+            salvoeRepo.save(salv5);
+            salvoeRepo.save(salv6);
 
             shipsRepo.save(ship1);
             shipsRepo.save(ship2);

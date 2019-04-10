@@ -5,10 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -89,9 +86,8 @@ public class SalvoController {
         return playerMap;
     }
 
-
     @RequestMapping("/gp_view/{gpID}")
-    public Map<String, Object> gpView(@PathVariable long gpID){
+    public Map<String, Object> gpView(@PathVariable long gpID) {
 
         Map<String, Object> gamePlayerMap = new HashMap<>();
         List<Object> gpOBJ = new ArrayList<>();
@@ -99,14 +95,16 @@ public class SalvoController {
         gamePlayerMap.put("gpID", gpRepo.getOne(gpID).getId());
         gamePlayerMap.put("realName", gpRepo.getOne(gpID).getPlayer().getFirstName());
         gamePlayerMap.put("ships", getShipsfromGamePlayer(gpRepo.getOne(gpID)));
+        gamePlayerMap.put("salvoes", getSalvoesfromGamePlayer(gpRepo.getOne(gpID)));
+
         gpOBJ.add(gamePlayerMap);
 
         Map<String, Object> idk = new HashMap<>();
+        idk.put("opponentInformation", getOpponentInfo(gpRepo.getOne(gpID)));
+
         idk.put("game_player", gpOBJ);
-        return gamePlayerMap;
+        return idk;
     }
-
-
 
     @RequestMapping("/game_view/{gameID}")
     public Map<String, Object> gameView(@PathVariable long gameID) {
@@ -122,6 +120,7 @@ public class SalvoController {
                     singleGamePlayerMap.put("playerID", gamePlayer.getPlayer().getId());
                     singleGamePlayerMap.put("playerName", gamePlayer.getPlayer().getFirstName());
                     singleGamePlayerMap.put("ships", getShipsfromGamePlayer(gamePlayer));
+                    singleGamePlayerMap.put("salvoes", getSalvoesfromGamePlayer(gamePlayer));
                     playersInGameObject.add(singleGamePlayerMap);
                 });
                 gamePlayersMap.put("gameID", game.getId());
@@ -133,15 +132,41 @@ public class SalvoController {
         return gamePlayersMap;
     }
 
-    public List<Object> getShipsfromGamePlayer(GamePlayer singleGP){
+    public List<Object> getShipsfromGamePlayer(GamePlayer singleGP) {
         List<Object> shipsObj = new ArrayList<>();
         singleGP.getShips().stream().forEach(ship -> {
             Map<String, Object> ships = new HashMap<>();
-            ships.put("location",ship.getlocation());
+            ships.put("location", ship.getlocation());
             ships.put("type", ship.getShipType());
             shipsObj.add(ships);
         });
         return shipsObj;
+    }
+    public List<Object> getOpponentInfo (GamePlayer you){
+
+        List<Object> opponentObj = new ArrayList<>();
+
+        you.getGame().getGamePlayers().stream().forEach(dude -> {
+            if (dude.getId() != you.getId()){
+                Map<String, Object> oppData = new HashMap<>();
+                oppData.put("enemySalvoes", getSalvoesfromGamePlayer(dude));
+                oppData.put("enemyShips", getShipsfromGamePlayer(dude));
+                opponentObj.add(oppData);
+            }
+        });
+
+        return opponentObj;
+    }
+
+    public List<Object> getSalvoesfromGamePlayer(GamePlayer singleGP) {
+        List<Object> salvoesObj = new ArrayList<>();
+        singleGP.getSalvoes().stream().sorted(Comparator.comparing(Salvo::getTurn)).forEach(salvo -> {
+            Map<String, Object> ships = new HashMap<>();
+            ships.put("turn", salvo.getTurn());
+            ships.put("location", salvo.getLocations());
+            salvoesObj.add(ships);
+        });
+        return salvoesObj;
     }
 }
 
