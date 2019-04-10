@@ -37,6 +37,9 @@ public class GamePlayer {
     @OneToMany(mappedBy="gamePlayer", fetch=FetchType.EAGER)
     Set<Ship> ships = new HashSet<>();
 
+    @OneToMany(mappedBy="gamePlayer", fetch=FetchType.EAGER)
+    Set<Salvo> salvoes = new HashSet<>();
+
     private LocalDateTime gameTime =  LocalDateTime.now();
 
     public GamePlayer(){
@@ -85,12 +88,21 @@ public class GamePlayer {
         return gameTime;
     }
 
-    public void setGameTime(LocalDateTime gameTime) {
-        this.gameTime = gameTime;
-    }
-
     public void setShips(Set<Ship> ships) {
         this.ships = ships;
+    }
+
+    public Set<Salvo> getSalvoes() {
+        return salvoes;
+    }
+
+    public void addSalvo(Salvo salvo) {
+        salvo.setGamePlayer(this);
+        salvoes.add(salvo);
+    }
+
+    public void setSalvoes(Set<Salvo> salvoes) {
+        this.salvoes = salvoes;
     }
 
     @Override

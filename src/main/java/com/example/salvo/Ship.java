@@ -2,7 +2,6 @@ package com.example.salvo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +26,6 @@ public class Ship {
     private List<String> location = new ArrayList<>();
 
     public Ship(){
-
     }
 
     public Ship(String type){
