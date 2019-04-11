@@ -105,6 +105,10 @@ public class GamePlayer {
         this.salvoes = salvoes;
     }
 
+    public Set<Score> getScoreFromGamePlayer (GamePlayer gamePlayer){
+        return gamePlayer.getPlayer().getScore();
+    }
+
     @Override
     public String toString() {
         return "GamePlayer{" +

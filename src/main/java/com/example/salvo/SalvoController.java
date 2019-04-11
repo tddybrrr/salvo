@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -20,6 +21,22 @@ public class SalvoController {
     @Autowired
     private GamePlayerRepository gpRepo;
 
+
+//    @RequestMapping("/leaderboard")
+    public List<Object> getleaderboard() {
+        List<Object> scoreObj = new ArrayList<>();
+
+        playerRepo.findAll().stream().forEach(p -> {
+            Map<String, Object> playersScore = new HashMap<>();
+            playersScore.put("player", p.getFirstName());
+            playersScore.put("win", p.getScore().stream().filter(s -> s.getScoreValue() == 1).collect(Collectors.counting()));
+            playersScore.put("lost", p.getScore().stream().filter(s -> s.getScoreValue() == 0).collect(Collectors.counting()));
+            playersScore.put("tied", p.getScore().stream().filter(s -> s.getScoreValue() == 0.5).collect(Collectors.counting()));
+            playersScore.put("total", p.getScore().stream().map(e-> e.getScoreValue()).reduce((double) 0, (a, b) -> a + b));
+            scoreObj.add(playersScore);
+        });
+        return scoreObj;
+    }
     @RequestMapping("/games")
     public Map<String, Object> getGames() {
 
@@ -29,22 +46,25 @@ public class SalvoController {
 
         Map<String, Object> playersMap = new HashMap<>();
 
+        // go through every game
         gameRepo.findAll().stream().forEach(each -> {
 
             Map<String, Object> gamesMap = new HashMap<>();
             List<Object> gpObject = new ArrayList<>();
 
+            // go through each game player in
             gpRepo.findAll().stream().forEach(eachGP -> {
 
                 Map<String, Object> gpMap = new HashMap<>();
-
+                //find matching gamePlayers in games
                 if (each.getGamePlayers().contains(eachGP)) {
-
+                    /// go through all the players
                     playerRepo.findAll().stream().forEach(eachPlayer -> {
 
                         if (eachGP.getPlayer().getFirstName() == eachPlayer.getFirstName()) {
                             playersMap.put("playerName", eachPlayer.getFirstName());
                             playersMap.put("playerID", eachPlayer.getId());
+
                             playersObj.add(playersMap);
                         }
                     });
@@ -63,6 +83,7 @@ public class SalvoController {
 
         Map<String, Object> finalMapOfGames = new HashMap<>();
 
+        finalMapOfGames.put("scores", getleaderboard());
         finalMapOfGames.put("games", gamesObject);
 
         return finalMapOfGames;
@@ -99,11 +120,11 @@ public class SalvoController {
 
         gpOBJ.add(gamePlayerMap);
 
-        Map<String, Object> idk = new HashMap<>();
-        idk.put("opponentInformation", getOpponentInfo(gpRepo.getOne(gpID)));
+        Map<String, Object> gpViewMap = new HashMap<>();
+        gpViewMap.put("opponentInformation", getOpponentInfo(gpRepo.getOne(gpID)));
 
-        idk.put("game_player", gpOBJ);
-        return idk;
+        gpViewMap.put("game_player", gpOBJ);
+        return gpViewMap;
     }
 
     @RequestMapping("/game_view/{gameID}")

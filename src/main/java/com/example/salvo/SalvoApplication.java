@@ -15,7 +15,7 @@ public class SalvoApplication {
 
     @Bean
     public CommandLineRunner initData(PlayerRepository playersRepo, GameRepository gamesRepo, GamePlayerRepository gamePlayerRepo,
-                                      ShipRepository shipsRepo, SalvoRepository salvoeRepo) {
+                                      ShipRepository shipsRepo, SalvoRepository salvoeRepo, ScoreRepository scoreRepo) {
         return (args) -> {
 
             Player p1 = new Player("Jack");
@@ -118,12 +118,30 @@ public class SalvoApplication {
             salv6.setlocation((Arrays.asList("d2", "d8")));
             gp2.addSalvo(salv6);
 
+            Salvo salv7 = new Salvo(3);
+            salv7.setlocation((Arrays.asList("b1", "b8")));
+            gp3.addSalvo(salv7);
+
+            Score score1 = new Score(p1, g1, 1.0);
+            Score score2 = new Score(p2, g1, 0.0);
+            Score score3 = new Score(p1, g2, .5);
+            Score score4 = new Score(p3, g2, .5);
+
+
+            scoreRepo.save(score1);
+            scoreRepo.save(score2);
+            scoreRepo.save(score3);
+            scoreRepo.save(score4);
+
+
+
             salvoeRepo.save(salv1);
             salvoeRepo.save(salv2);
             salvoeRepo.save(salv3);
             salvoeRepo.save(salv4);
             salvoeRepo.save(salv5);
             salvoeRepo.save(salv6);
+            salvoeRepo.save(salv7);
 
             shipsRepo.save(ship1);
             shipsRepo.save(ship2);

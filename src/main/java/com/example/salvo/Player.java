@@ -1,5 +1,6 @@
 package com.example.salvo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Entity;
@@ -8,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.FetchType;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,6 +24,10 @@ public class Player {
 
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
+
+
+    @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
+    Set<Score> scores = new HashSet<>();
 
     public Player() {
     }
@@ -46,6 +52,15 @@ public class Player {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    @JsonIgnore
+    public Set<Score> getScore(){
+        return this.scores;
+    }
+
+    public void setScores(Set<Score> scores) {
+        this.scores = scores;
     }
 
 

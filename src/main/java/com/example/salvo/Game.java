@@ -11,6 +11,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.FetchType;
 import java.time.LocalDateTime;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -23,6 +24,12 @@ public class Game {
 
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
     Set<GamePlayer> gamePlayers;
+
+    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
+    Set<Score> scores = new HashSet<>();
+
+
+
 
     private LocalDateTime gameTime =  LocalDateTime.now();
 
@@ -37,6 +44,17 @@ public class Game {
     public Set<GamePlayer> getGamePlayers() {
         return gamePlayers;
     }
+
+    @JsonIgnore
+    public Set<Score> getScore(){
+        return this.scores;
+    }
+
+
+    public Set<Score> getScores() {
+        return scores;
+    }
+
 
 
     public LocalDateTime getGameTime() {
