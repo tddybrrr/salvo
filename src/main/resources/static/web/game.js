@@ -1,5 +1,52 @@
 
 
+
+let form = document.getElementById('myForm');
+
+function testLogin() {
+
+  fetch('/api/login', {
+          credentials: 'include',
+          method: 'POST',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'userName=' + form[0].value + '&password=' + form[1].value
+      })
+      .then(response => {
+          console.log(response);
+          if(response.ok){
+              console.log("success!");
+              document.location.reload(true);
+          }
+      })
+      .catch(err => console.log(err))
+}
+
+
+function testLogout(){
+
+    fetch('/api/logout', {
+              credentials: 'include',
+              method: 'POST',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              },
+//              body: 'userName=' + form[0].value + '&password=' + form[1].value
+          })
+          .then(response => {
+              console.log(response);
+              if(response.ok){
+                document.location.reload(true);
+                  console.log("logged out!");
+              }
+          })
+          .catch(err => console.log(err))
+    }
+
+
  // get url of page to pull correct data from api
 var gameNumIndex = window.location.href.indexOf("g=");
 var gameNum = window.location.href.slice(gameNumIndex+2);

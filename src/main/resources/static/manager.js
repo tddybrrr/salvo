@@ -29,14 +29,14 @@ $(function() {
   // code to post a new player using AJAX
   // on success, reload and display the updated data from the server
 
-  function postPlayer(firstName) {
+  function postPlayer(userName) {
     $.post({
       headers: {
           'Content-Type': 'application/json'
       },
       dataType: "text",
       url: "/players",
-      data: JSON.stringify({ "firstName": firstName })
+      data: JSON.stringify({ "userName": userName })
     })
     .done(function( ) {
       showOutput( "Saved -- reloading");

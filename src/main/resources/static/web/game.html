@@ -3,11 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>game</title>
-    <link rel="stylesheet" href="game_view_style.css">
+    <link rel="stylesheet" href="game.css">
 </head>
 <body>
 
+    <form id="myForm" name="myForm">
+            Enter Username: <input type="text" id="username" name="userName">
+           Enter password:   <input type="text" id="password" name="password">
+    </form>
+
+    <button onclick="testLogin()">Sign in !</button>
+
+    <button onclick="testLogout()"> LOG OUT </button>
+
     <br><br><br>
+
     <div id="tableWrapper">
         <table id="mainTable">
             <thead>
@@ -29,29 +39,18 @@
             </tbody>
         </table>
     </div>
-
     <br><br>
-
     <hr>
     <hr>
     <hr>
     <br>
     <br>
-
     <div id="games">
-
         <div id="gp1Grid">
-
-
         </div>
         <div id="gp2Grid">
-
-
         </div>
-
-
     </div>
-
     <div id="idk">
         <h1 id="gpShips"> </h1>
         <table id="grid"> </table>

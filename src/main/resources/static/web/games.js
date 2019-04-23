@@ -37,10 +37,8 @@ function buildLeaderBoard(scores){
       cell.innerHTML="Won"
       var cell = row.insertCell(2);
       cell.innerHTML="Lost"
-
-         var cell = row.insertCell(3);
-            cell.innerHTML="Tied"
-
+      var cell = row.insertCell(3);
+      cell.innerHTML="Tied"
       var cell = row.insertCell(4);
       cell.innerHTML="Total score"
 

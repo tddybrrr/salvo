@@ -19,7 +19,8 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
     @GenericGenerator(name = "native", strategy = "native")
     private long id;
-    private String firstName;
+    private String userName;
+    private String password;
 
 
     @OneToMany(mappedBy="player", fetch=FetchType.EAGER)
@@ -33,7 +34,7 @@ public class Player {
     }
 
     public Player(String first) {
-        this.firstName = first;
+        this.userName = first;
 
     }
 
@@ -46,12 +47,12 @@ public class Player {
         return gamePlayers;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getuserName() {
+        return userName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setuserName(String userName) {
+        this.userName = userName;
     }
 
     @JsonIgnore
@@ -63,8 +64,6 @@ public class Player {
         this.scores = scores;
     }
 
-
-
     public long getId() {
         return id;
     }
@@ -74,6 +73,14 @@ public class Player {
     }
 
     public String toString() {
-        return firstName;
+        return userName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
