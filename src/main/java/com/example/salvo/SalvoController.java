@@ -2,14 +2,11 @@ package com.example.salvo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,17 +23,6 @@ public class SalvoController {
 
     @Autowired
     private GamePlayerRepository gamePlayerRepo;
-//
-//    @RequestMapping("/login")
-//    public Player loggedPlayer() {
-//
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//
-//        if (!(authentication instanceof AnonymousAuthenticationToken)) {
-//            return playersRepo.findUserByUserName(authentication.getName());
-//        }
-//        else return null;
-//    }
 
     private boolean isGuest(Authentication authentication) {
         return authentication == null || authentication instanceof AnonymousAuthenticationToken;
@@ -56,8 +42,15 @@ public class SalvoController {
         });
         return scoreObj;
     }
+
+
+    private Player getAuthenticatedPlayer (Authentication authentication){
+            return playersRepo.findUserByUserName(authentication.getName());
+    };
+
+
     @RequestMapping("/games")
-    public Map<String, Object> getGames() {
+    public Map<String, Object> getGames(Authentication authentication) {
 
         List<Object> gamesObject = new ArrayList<>();
 
@@ -105,6 +98,16 @@ public class SalvoController {
         finalMapOfGames.put("scores", getleaderboard());
         finalMapOfGames.put("games", gamesObject);
 
+        if (!isGuest(authentication)){
+            Map<String, Object> onePlayer = new HashMap<>();
+            onePlayer.put("playerID", getAuthenticatedPlayer(authentication).getId());
+            onePlayer.put("username", getAuthenticatedPlayer(authentication).getuserName());
+            finalMapOfGames.put("player", onePlayer);
+
+        } else {
+            finalMapOfGames.put("player", null);
+        }
+
         return finalMapOfGames;
     }
 
@@ -124,6 +127,34 @@ public class SalvoController {
         playerMap.put("players", playerObj);
 
         return playerMap;
+    }
+
+    @RequestMapping(path = "/players", method = RequestMethod.POST)
+    public ResponseEntity<HashMap<String, Object>> createPlayer(@RequestParam("userName") String userName, @RequestParam("password") String password) {
+
+        // Forbidden is a 403 error
+
+        if (userName.isEmpty()) {
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "No email given"), HttpStatus.FORBIDDEN);
+        }
+
+        // Conflict is a 409 error
+        Player player = playersRepo.findUserByUserName(userName);
+        if (player != null) {
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "Email already used"), HttpStatus.CONFLICT);
+        }
+
+        // created is 201 response
+        Player newPlayer = new Player(userName);
+        newPlayer.setPassword(password);
+        playersRepo.save(newPlayer);
+        return new ResponseEntity<>(makeMapForResponseEntity("New User", newPlayer.toString()), HttpStatus.CREATED);
+    }
+
+    private HashMap<String, Object> makeMapForResponseEntity(String key, Object value) {
+        HashMap<String, Object> map = new LinkedHashMap<>();
+        map.put(key, value);
+        return map;
     }
 
     @RequestMapping("/gp_view/{gpID}")
@@ -194,7 +225,6 @@ public class SalvoController {
                 opponentObj.add(oppData);
             }
         });
-
         return opponentObj;
     }
 
@@ -208,6 +238,8 @@ public class SalvoController {
         });
         return salvoesObj;
     }
+
+
 }
 
 

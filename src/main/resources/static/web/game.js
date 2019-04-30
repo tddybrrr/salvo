@@ -3,6 +3,29 @@
 
 let form = document.getElementById('myForm');
 
+
+function testSignup() {
+
+  fetch('/api/players', {
+          credentials: 'include',
+          method: 'POST',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'userName=' + form[0].value + '&password=' + form[1].value
+      })
+      .then(response => response.json())
+      .then(response => {
+          console.log(response);
+          if (response != null){
+              setTimeout(testLogin,2000);
+          }
+      })
+      .catch(err => console.log(err))
+}
+
+
 function testLogin() {
 
   fetch('/api/login', {
@@ -34,13 +57,12 @@ function testLogout(){
                   'Accept': 'application/json',
                   'Content-Type': 'application/x-www-form-urlencoded'
               },
-//              body: 'userName=' + form[0].value + '&password=' + form[1].value
           })
           .then(response => {
               console.log(response);
               if(response.ok){
                 document.location.reload(true);
-                  console.log("logged out!");
+                 console.log("logged out!");
               }
           })
           .catch(err => console.log(err))
