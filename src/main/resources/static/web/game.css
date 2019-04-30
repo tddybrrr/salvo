@@ -1,26 +1,27 @@
 
-
-th, td, tr {
-    border: solid 1px black;
+body{
+    text-align: center !important;
+    height: 100vh;
 }
 
 
-body{
-    text-align: center;
+
+.loginStyle{
+       display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        height: 100%;
+}
+
+#myForm{
+    background-color: orange;
 }
 
 tableWrapper{
     display: flex;
 }
 
-#mainTable{
-    margin: auto;
-    width: 50%;
-}
-
-hr{
-    border-color: red;
-}
 
 #games, #daGrids{
     display: flex;

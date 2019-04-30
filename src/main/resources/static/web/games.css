@@ -1,18 +1,17 @@
 
+
 th, td, tr {
     border: solid 1px black;
     width: max-content;
 }
 
 #container{
-
     height: 100vh;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-around;
-
 }
 
 caption{
@@ -24,5 +23,10 @@ table{
     width: 400px;
     height: 400px;
     text-align: center;
+}
 
+#tableWrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
