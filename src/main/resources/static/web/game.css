@@ -4,14 +4,19 @@ body{
     height: 100vh;
 }
 
-
-
 .loginStyle{
        display: flex;
         flex-direction: column;
         justify-content: space-around;
         align-items: center;
         height: 100%;
+}
+
+.form-group{
+    width: 33%;
+    margin: auto;
+    border: solid 1px black;
+    padding: 1em;
 }
 
 #myForm{
@@ -21,7 +26,6 @@ body{
 tableWrapper{
     display: flex;
 }
-
 
 #games, #daGrids{
     display: flex;

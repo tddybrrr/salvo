@@ -26,7 +26,6 @@ function tester(){
           .catch(err => console.log(err))
 }
 
-
 function buildLoginPanel(){
      var wrapper = document.getElementById("wrapper");
     wrapper.innerHTML = "";
@@ -76,7 +75,6 @@ let form = document.getElementById('myForm');
       .catch(err => console.log(err))
 }
 
-
 //------------------------------------------------------------
 //Building the user interface for a logged in player
 
@@ -87,15 +85,14 @@ function buildUI(){
     var somediv = document.createElement('div');
     var body = document.getElementById("body");
     body.appendChild(somediv);
-    somediv.innerHTML = '<div class="form-group"> <label for="exampleFormControlSelect1">Example select</label> <select class="form-control" id="gadget" name="gadget"> <option>1</option> <option>2</option> <option>3</option> <option>4</option> <option>5</option> </select> <button id="btn">Show selected games</button></div>';
+    somediv.innerHTML = '<div id="uiForm "class="form-group"> <select class="form-control" id="gadget" name="gadget"> <option>1</option> <option>2</option> <option>3</option> <option>4</option> <option>5</option> </select> <button id="btn">Show selected games</button></div>';
     document.getElementById('btn').addEventListener('click', show_selected);
-
 }
 
 function show_selected() {
     var selector = document.getElementById('gadget');
     var value = selector[selector.selectedIndex].value;
-    console.log(value);
+    fetchData(value);
 }
 
 function testLogout(){
@@ -120,34 +117,43 @@ function testLogout(){
 
 //-----------------------------------------------------------------------------------
 
-var gpNumIndex = window.location.href.indexOf("gp=");
-var gpNum = window.location.href.slice(gpNumIndex+3);
+function fetchData(gpNum){
 
-if (window.location.href.includes("gp=")){
+//    document.getElementById("tableWrapper").innerHTML = "";
 
- document.getElementById("tableWrapper").innerHTML = "";
+    fetch( "http://localhost:8080/api/gp_view/"+gpNum).then(function(response) {
+          if (response.ok) {
+          // add a new promise to the chain
+            return response.json();
+          }
+          // signal a server error to the chain
+          throw new Error(response.statusText);
+        }).then(function(json) {
 
-fetch( "http://localhost:8080/api/gp_view/"+gpNum).then(function(response) {
-      if (response.ok) {
-      // add a new promise to the chain
-        return response.json();
-      }
-      // signal a server error to the chain
-      throw new Error(response.statusText);
-    }).then(function(json) {
+            console.log(json);
+            firstPersonView(json)
+        }).catch(function(error) {
+          // called when an error occurs anywhere in the chain
+          console.log( "Request failed: " + error.message );
+        });
+}
 
-        console.log(json);
-        firstPersonView(json)
-    }).catch(function(error) {
-      // called when an error occurs anywhere in the chain
-      console.log( "Request failed: " + error.message );
-    });
+function insertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
 
 function firstPersonView(data){
 
-    var daGrids = document.getElementById('tableWrapper');
-    daGrids.id="daGrids";
+    var lowerSection = document.getElementById('lowerSection');
+    var daGrids = document.getElementById('daGrids');
+    if (daGrids){
+        daGrids.innerHTML="";
+        console.log("dagrids exists?")
+    } else {
+        var daGrids = document.createElement('div');
+            daGrids.id="daGrids";
+            insertAfter(daGrids, lowerSection);
+    }
 
     var myGrid = document.createElement("table");
     myGrid.classList.add("table", "table-bordered");

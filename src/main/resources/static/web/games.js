@@ -7,8 +7,8 @@ function buildLeaderBoard(scores){
 
 
      for (i = 0; i < scores.length; i++){
-        var row = table.insertRow(i);
 
+          var row = table.insertRow(i);
           var cell = row.insertCell(0);
           cell.innerHTML=scores[i].player;
           var cell = row.insertCell(1);
@@ -17,17 +17,9 @@ function buildLeaderBoard(scores){
           cell.innerHTML=scores[i].lost;
           var cell = row.insertCell(3);
           cell.innerHTML=scores[i].tied;
-           var cell = row.insertCell(4);
-           cell.innerHTML=scores[i].total;
+          var cell = row.insertCell(4);
+          cell.innerHTML=scores[i].total;
 
-//        for (var key in scores[i]) {
-//            var x = 0;
-//                 if (scores[i].hasOwnProperty(key)) {
-//                     var cell = row.insertCell(x);
-//                     x++;
-//                     cell.innerHTML = (scores[i][key]);
-//                 }
-//             }
      }
       var header = table.createTHead();
       var row = header.insertRow(0);
@@ -54,10 +46,21 @@ function buildOverview(games){
            var row = table.insertRow(i);
            var cell = row.insertCell(0);
            cell.innerHTML=games[i].gameID;
+
            var cell = row.insertCell(1);
-           cell.innerHTML=games[i].gamePlayers[0].gpName;
+
+           var link = document.createElement('a');
+           link.innerHTML=games[i].gamePlayers[0].gpName;
+           link.href="/game.html?=gp" + games[i].gamePlayers[0].gpID;
+           cell.appendChild(link);
+
            var cell = row.insertCell(2);
-           cell.innerHTML=games[i].gamePlayers[1].gpName;
+
+            var link = document.createElement('a');
+          link.innerHTML=games[i].gamePlayers[1].gpName;
+          link.href="/game.html?=gp" + games[i].gamePlayers[1].gpID;
+          cell.appendChild(link);
+
            var cell = row.insertCell(3);
            cell.innerHTML=games[i].gameMinute;
      }
@@ -84,6 +87,7 @@ fetch( "http://localhost:8080/api/games").then(function(response) {
   throw new Error(response.statusText);
 }).then(function(json) {
     console.log(json.scores)
+    console.log(json.games)
     buildLeaderBoard(json.scores)
     buildOverview(json.games)
 }).catch(function(error) {
