@@ -29,8 +29,6 @@ public class Game {
     Set<Score> scores = new HashSet<>();
 
 
-
-
     private LocalDateTime gameTime =  LocalDateTime.now();
 
     public Game() { }
@@ -71,6 +69,10 @@ public class Game {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    boolean isFull(){
+        return this.gamePlayers.size() > 1;
     }
 
     @Override

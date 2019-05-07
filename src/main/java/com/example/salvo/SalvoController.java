@@ -107,8 +107,45 @@ public class SalvoController {
         } else {
             finalMapOfGames.put("player", null);
         }
-
         return finalMapOfGames;
+    }
+
+    @RequestMapping(path = "/games", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> createNewGame(Authentication authentication) {
+
+
+        if (getAuthenticatedPlayer(authentication).getuserName()== null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
+        } else {
+
+            Game aGame = new Game();
+            gamesRepo.save(aGame);
+
+            GamePlayer aGamePlayer= new GamePlayer(aGame, getAuthenticatedPlayer(authentication) );
+
+            gamePlayerRepo.save(aGamePlayer);
+
+            return new ResponseEntity<>(makeMapForResponseEntity("newGpID", aGamePlayer.getId()), HttpStatus.CREATED);
+
+        }
+    }
+
+
+    @RequestMapping(path = "/game/{gameID}/players", method = RequestMethod.POST)
+    public ResponseEntity<Map<String, Object>> joinGame(@PathVariable long gameID, Authentication authentication) {
+
+        if (getAuthenticatedPlayer(authentication).getuserName()== null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
+        } else if (gamesRepo.findOne(gameID) == null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "no such game"), HttpStatus.FORBIDDEN);
+        }   else if (gamesRepo.findOne(gameID).isFull()){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "game is full"), HttpStatus.FORBIDDEN);
+        } else {
+            //get current game
+            GamePlayer aGamePlayer= new GamePlayer(gamesRepo.getOne(gameID), getAuthenticatedPlayer(authentication) );
+            gamePlayerRepo.save(aGamePlayer);
+            return new ResponseEntity<>(makeMapForResponseEntity("newGpID", aGamePlayer.getId()), HttpStatus.CREATED);
+        }
     }
 
     @RequestMapping("/players")
@@ -158,24 +195,32 @@ public class SalvoController {
     }
 
     @RequestMapping("/gp_view/{gpID}")
-    public Map<String, Object> gpView(@PathVariable long gpID) {
+    public Map<String, Object> gpView(@PathVariable long gpID, Authentication auth) {
 
-        Map<String, Object> gamePlayerMap = new HashMap<>();
-        List<Object> gpOBJ = new ArrayList<>();
+        if (getAuthenticatedPlayer(auth).getuserName() == gamePlayerRepo.getOne(gpID).getPlayer().getuserName()){
+            Map<String, Object> gamePlayerMap = new HashMap<>();
+            List<Object> gpOBJ = new ArrayList<>();
 
-        gamePlayerMap.put("gpID", gamePlayerRepo.getOne(gpID).getId());
-        gamePlayerMap.put("realName", gamePlayerRepo.getOne(gpID).getPlayer().getuserName());
-        gamePlayerMap.put("ships", getShipsfromGamePlayer(gamePlayerRepo.getOne(gpID)));
-        gamePlayerMap.put("salvoes", getSalvoesfromGamePlayer(gamePlayerRepo.getOne(gpID)));
+            gamePlayerMap.put("gpID", gamePlayerRepo.getOne(gpID).getId());
+            gamePlayerMap.put("realName", gamePlayerRepo.getOne(gpID).getPlayer().getuserName());
+            gamePlayerMap.put("ships", getShipsfromGamePlayer(gamePlayerRepo.getOne(gpID)));
+            gamePlayerMap.put("salvoes", getSalvoesfromGamePlayer(gamePlayerRepo.getOne(gpID)));
 
-        gpOBJ.add(gamePlayerMap);
+            gpOBJ.add(gamePlayerMap);
 
-        Map<String, Object> gpViewMap = new HashMap<>();
-        gpViewMap.put("opponentInformation", getOpponentInfo(gamePlayerRepo.getOne(gpID)));
+            Map<String, Object> gpViewMap = new HashMap<>();
+            gpViewMap.put("opponentInformation", getOpponentInfo(gamePlayerRepo.getOne(gpID)));
 
-        gpViewMap.put("game_player", gpOBJ);
-        return gpViewMap;
+            gpViewMap.put("game_player", gpOBJ);
+            return gpViewMap;
+
+        }
+        else {
+            return makeMapForResponseEntity("error", HttpStatus.FORBIDDEN);
+        }
+
     }
+
 
     @RequestMapping("/game_view/{gameID}")
     public Map<String, Object> gameView(@PathVariable long gameID) {

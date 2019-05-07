@@ -4,8 +4,6 @@
 function buildLeaderBoard(scores){
 
      var table = document.getElementById("leaderBoard");
-
-
      for (i = 0; i < scores.length; i++){
 
           var row = table.insertRow(i);
@@ -33,7 +31,26 @@ function buildLeaderBoard(scores){
       cell.innerHTML="Tied"
       var cell = row.insertCell(4);
       cell.innerHTML="Total score"
+}
 
+function createGame(){
+      fetch("http://localhost:8080/api/games", {
+           credentials: 'include',
+           method: 'POST',
+           headers: {
+               'Accept': 'application/json',
+               'Content-Type': 'application/x-www-form-urlencoded'
+           }
+      })
+      .then(response =>  response.json())
+      .then(data => {
+            if (data !== "undefined"){
+             window.location.href = "game.html?gp=" + data.newGpID;
+            } else {
+               alert("You must be logged-in to do this");
+            }
+        })
+        .catch(err => console.log(err))
 }
 
 
@@ -50,19 +67,34 @@ function buildOverview(games){
            var cell = row.insertCell(1);
 
            var link = document.createElement('a');
-           link.innerHTML=games[i].gamePlayers[0].gpName;
-           link.href="/game.html?=gp" + games[i].gamePlayers[0].gpID;
+
+           if (games[i].gamePlayers[0]=== undefined){
+              link.innerHTML="N/A"
+           } else {
+              link.innerHTML=games[i].gamePlayers[0].gpName;
+             link.href="/web/game.html?gp=" + games[i].gamePlayers[0].gpID;
+            }
            cell.appendChild(link);
 
            var cell = row.insertCell(2);
-
-            var link = document.createElement('a');
+           var link = document.createElement('a');
+            if (games[i].gamePlayers[1] === undefined){
+                     link.innerHTML="N/A"
+            } else {
           link.innerHTML=games[i].gamePlayers[1].gpName;
-          link.href="/game.html?=gp" + games[i].gamePlayers[1].gpID;
-          cell.appendChild(link);
+          link.href="/web/game.html?gp=" + games[i].gamePlayers[1].gpID;
+          }
 
+          cell.appendChild(link);
            var cell = row.insertCell(3);
            cell.innerHTML=games[i].gameMinute;
+            var cell = row.insertCell(4);
+            var button = document.createElement('BUTTON');
+            button.innerHTML = "JOIN"
+
+            var gameIDnumber = games[i].gameID;
+            button.onclick=function(){joinGame(gameIDnumber)};
+           cell.appendChild(button);
      }
 
        var header = table.createTHead();
@@ -75,24 +107,55 @@ function buildOverview(games){
        cell.innerHTML="Player Two"
        var cell = row.insertCell(3);
        cell.innerHTML="Game Time"
+        var cell = row.insertCell(4);
+       cell.innerHTML="Join game"
     }
 
 
-fetch( "http://localhost:8080/api/games").then(function(response) {
-  if (response.ok) {
-  // add a new promise to the chain
-    return response.json();
-  }
-  // signal a server error to the chain
-  throw new Error(response.statusText);
-}).then(function(json) {
-    console.log(json.scores)
-    console.log(json.games)
-    buildLeaderBoard(json.scores)
-    buildOverview(json.games)
-}).catch(function(error) {
-  // called when an error occurs anywhere in the chain
-  console.log( "Request failed: " + error.message );
+function joinGame(gameID){
+
+    fetch("http://localhost:8080/api/game/" + gameID + "/players", {
+           credentials: 'include',
+           method: 'POST',
+           headers: {
+               'Accept': 'application/json',
+               'Content-Type': 'application/x-www-form-urlencoded'
+           }
+      })
+      .then(response =>  response.json())
+      .then(data => {
+            if (data.error === "game is full"){
+               alert(data.error);
+            } else if (data.error === "no such game") {
+               alert("no such game");
+            } else if (data.error === "you are not logged in"){
+                alert("you are not logged in");
+            } else {
+                alert("success?");
+            }
+        })
+        .catch(err => console.log(err))
+}
+
+
+fetch( "http://localhost:8080/api/games",{
+        method: "GET"
+
+    }).then(function(response) {
+        if (response.ok) {
+        // add a new promise to the chain
+        return response.json();
+        }
+    // signal a server error to the chain
+    throw new Error(response.statusText);
+    }).then(function(json) {
+        //    console.log(json.scores)
+        //    console.log(json.games)
+        buildLeaderBoard(json.scores)
+        buildOverview(json.games)
+    }).catch(function(error) {
+        // called when an error occurs anywhere in the chain
+        console.log( "Request failed: " + error.message );
 });
 
 

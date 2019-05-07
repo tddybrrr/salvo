@@ -3,9 +3,10 @@
 tester();
 
 function tester(){
+
     fetch('/api/games', {
               credentials: 'include',
-              method: 'POST',
+              method: 'GET',
               headers: {
                   'Accept': 'application/json',
                   'Content-Type': 'application/x-www-form-urlencoded'
@@ -15,11 +16,18 @@ function tester(){
           .then(response => {
           //if some one is logged in, build the user interface
               if(response.player != null){
-                console.log("someone is looged in")
+                console.log(response)
                 buildUI();
+                    // if 'gp' is not in the url
+                  if (window.location.href.indexOf('gp') !== -1){
+                        var url = window.location.href;
+                        var gpNum = url.split('gp=').pop();
+                        fetchData(gpNum);
+                    } else {
+                        fetchData(response.games[0].gamePlayers[0].gpID)
+                    }
               //if some no one is logged in, build the sign-up form
               } else {
-                console.log("no one is logged in");
                 buildLoginPanel();
               }
           })
@@ -65,11 +73,12 @@ let form = document.getElementById('myForm');
           },
           body: 'userName=' + form[0].value + '&password=' + form[1].value
       })
-//      .then(response => response.json())
       .then(response => {
           console.log(response.status)
           if(response.ok){
                location.reload();
+          } else {
+          alert("Incorrect username or password");
           }
       })
       .catch(err => console.log(err))
@@ -81,7 +90,7 @@ let form = document.getElementById('myForm');
 function buildUI(){
     var wrapper = document.getElementById("wrapper");
     wrapper.innerHTML = "";
-    wrapper.innerHTML = ' <div id="lowerSection"> <div id="tableWrapper"> <button id = "logoutButton" type="button" class="btn btn-secondary m-3 logoutButton" onclick="testLogout()"> LOG OUT</button> </div> </div>';
+    wrapper.innerHTML = ' <div id="lowerSection"> <div id="tableWrapper"> <button id = "logoutButton" type="button" class="btn btn-secondary m-3 logoutButton" onclick="testLogout()"> LOG OUT</button><a href="/web/games.html">home</a> </div> </div>';
     var somediv = document.createElement('div');
     var body = document.getElementById("body");
     body.appendChild(somediv);
@@ -119,25 +128,26 @@ function testLogout(){
 
 function fetchData(gpNum){
 
-//    document.getElementById("tableWrapper").innerHTML = "";
+    fetch(("http://localhost:8080/api/gp_view/"+ gpNum), {
+            method: "GET",
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded'
+                      }
+    })
+    .then(response => response.json())
+    .then(function(data) {
 
-    fetch( "http://localhost:8080/api/gp_view/"+gpNum).then(function(response) {
-          if (response.ok) {
-          // add a new promise to the chain
-            return response.json();
-          }
-          // signal a server error to the chain
-          throw new Error(response.statusText);
-        }).then(function(json) {
-
-            console.log(json);
-            firstPersonView(json)
-        }).catch(function(error) {
-          // called when an error occurs anywhere in the chain
-          console.log( "Request failed: " + error.message );
-        });
+        if (data.error === "FORBIDDEN"){
+             alert("not your game bro");
+        } else {
+            firstPersonView(data)
+        }
+    }).catch(function(error) {
+      // called when an error occurs anywhere in the chain
+      console.log(error);
+    });
 }
-
 function insertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
@@ -148,7 +158,6 @@ function firstPersonView(data){
     var daGrids = document.getElementById('daGrids');
     if (daGrids){
         daGrids.innerHTML="";
-        console.log("dagrids exists?")
     } else {
         var daGrids = document.createElement('div');
             daGrids.id="daGrids";
