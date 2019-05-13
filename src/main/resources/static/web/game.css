@@ -1,7 +1,6 @@
 
 body{
     text-align: center !important;
-    height: 100vh;
 }
 
 .loginStyle{
@@ -12,11 +11,15 @@ body{
         height: 100%;
 }
 
-.form-group{
-    width: 33%;
-    margin: auto;
-    border: solid 1px black;
-    padding: 1em;
+#shipSelector, #uiForm{
+    border: 1px solid black;
+}
+
+#wrapper{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
 }
 
 #myForm{

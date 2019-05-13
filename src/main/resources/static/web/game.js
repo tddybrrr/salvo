@@ -20,12 +20,17 @@ function tester(){
                 buildUI();
                     // if 'gp' is not in the url
                   if (window.location.href.indexOf('gp') !== -1){
-                        var url = window.location.href;
-                        var gpNum = url.split('gp=').pop();
-                        fetchData(gpNum);
-                    } else {
-                        fetchData(response.games[0].gamePlayers[0].gpID)
-                    }
+                    var url = window.location.href;
+                    var gpNum = url.split('gp=').pop();
+                    fetchData(gpNum);
+                } else if (window.location.href.indexOf('selectGamePlayer') !== -1) {
+                    var url = window.location.href;
+                    var gpNum = url.split('Player=').pop();
+                    fetchData(gpNum);
+                }
+                else {
+                    fetchData(response.games[0].gamePlayers[0].gpID)
+                }
               //if some no one is logged in, build the sign-up form
               } else {
                 buildLoginPanel();
@@ -35,7 +40,7 @@ function tester(){
 }
 
 function buildLoginPanel(){
-     var wrapper = document.getElementById("wrapper");
+    var wrapper = document.getElementById("wrapper");
     wrapper.innerHTML = "";
     wrapper.classList.add('loginStyle');
     wrapper.innerHTML='<form class="form-group w-50 p-3" id="myForm" name="myForm"> <div class="row"> <div class="col"> Enter Username: <input class="form-control" type="text" id="username" name="userName"> </div> <div class="col"> Enter password: <input class="form-control" type="text" id="password" name="password"> </div> </div> <div class="row"> <button id = "signinButton" type="button" class="btn btn-primary col m-3" onclick="testLogin()">Sign in</button> <button id = "signupButton" type="button" class="btn btn-success col m-3" onclick="testSignup()">Sign up</button> </div> </form>';
@@ -43,7 +48,7 @@ function buildLoginPanel(){
 
 function testSignup() {
     let form = document.getElementById('myForm');
-  fetch('/api/players', {
+    fetch('/api/players', {
           credentials: 'include',
           method: 'POST',
           headers: {
@@ -91,21 +96,31 @@ function buildUI(){
     var wrapper = document.getElementById("wrapper");
     wrapper.innerHTML = "";
     wrapper.innerHTML = ' <div id="lowerSection"> <div id="tableWrapper"> <button id = "logoutButton" type="button" class="btn btn-secondary m-3 logoutButton" onclick="testLogout()"> LOG OUT</button><a href="/web/games.html">home</a> </div> </div>';
-    var somediv = document.createElement('div');
+    var gameSelector = document.createElement('div');
+
     var body = document.getElementById("body");
-    body.appendChild(somediv);
-    somediv.innerHTML = '<div id="uiForm "class="form-group"> <select class="form-control" id="gadget" name="gadget"> <option>1</option> <option>2</option> <option>3</option> <option>4</option> <option>5</option> </select> <button id="btn">Show selected games</button></div>';
+    wrapper.appendChild(gameSelector);
+    gameSelector.innerHTML = '<form id="uiForm"> <div class=" form-group row"> <label for="selectGamePlayer" class="col-sm-6 col-form-label">select game player: </label> <div class="col-sm-5"> <select class="form-control" id="selectGamePlayer" name="selectGamePlayer"> <option>1</option> <option>2</option> <option>3</option> <option>4</option> <option>5</option> </select> </div> </div> <div class="form-row"> <button id="btn"> Show selected games</button> </div></form>';
     document.getElementById('btn').addEventListener('click', show_selected);
+
+    var shipAdder = document.createElement('div');
+    wrapper.appendChild(shipAdder);
+    shipAdder.innerHTML = '<form id="shipSelector"> <div class="form-group row"> <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type: </label> <div class="col-sm-6"> <select class="form-control" id="shipTypeSelector" name="shipTypeSelector"> <option>Destroyer</option> <option>Aircraft Carrier</option> <option>Helicopter</option> <option>Submarine</option> </select> </div> </div> <div class="form-group row"> <label for="shipDirection" class="col-sm-6 col-form-label">ship direction: </label> <div class="col-sm-6"> <select class="form-control" id="shipDirection" name="shipDirection"> <option>Right</option> <option>Down</option> </select> </div> </div> <div class="form-row"> <button id="addShipBtn">addShip!</button> </div></form>';
+    document.getElementById('addShipBtn').addEventListener('click', function(event){
+    event.preventDefault();
+    addShip();
+    });
+
+
 }
 
 function show_selected() {
-    var selector = document.getElementById('gadget');
+    var selector = document.getElementById('selectGamePlayer');
     var value = selector[selector.selectedIndex].value;
     fetchData(value);
 }
 
 function testLogout(){
-
     fetch('/api/logout', {
               credentials: 'include',
               method: 'POST',
@@ -126,8 +141,42 @@ function testLogout(){
 
 //-----------------------------------------------------------------------------------
 
+
+
+
+function addShip(){
+
+//    var type = document.getElementById('shipTypeSelector');
+//    var value = selector.value;
+//    console.log(value);
+//    var selector = document.getElementById('shipDirection');
+//    var value = selector.value;
+//    console.log(value);
+//    var sampleObject =  { "shipType": "patrolBoat", "location": ["h5", "h6"] }
+//
+//
+//    var gamePlayerId = 5;
+//
+//    fetch('/api/games/players/' + gamePlayerId + '/ships', {
+//          credentials: 'include',
+//          method: 'POST',
+//          headers: {
+//              'Accept': 'application/json',
+//              'Content-Type': 'application/json'
+//          },
+//        body: JSON.stringify(sampleObject)
+//      })
+//      .then(response => response.json())
+//      .then(function(data) {
+//        console.log(data);
+//        alert(data.error);
+//    })
+//        .catch(err => console.log(err))
+}
+
 function fetchData(gpNum){
 
+    console.log(gpNum);
     fetch(("http://localhost:8080/api/gp_view/"+ gpNum), {
             method: "GET",
             headers: {
@@ -137,7 +186,7 @@ function fetchData(gpNum){
     })
     .then(response => response.json())
     .then(function(data) {
-
+        console.log(data);
         if (data.error === "FORBIDDEN"){
              alert("not your game bro");
         } else {
@@ -148,6 +197,7 @@ function fetchData(gpNum){
       console.log(error);
     });
 }
+
 function insertAfter(newNode, referenceNode) {
     referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }

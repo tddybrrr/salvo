@@ -137,10 +137,8 @@ function joinGame(gameID){
         .catch(err => console.log(err))
 }
 
-
 fetch( "http://localhost:8080/api/games",{
         method: "GET"
-
     }).then(function(response) {
         if (response.ok) {
         // add a new promise to the chain

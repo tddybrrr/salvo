@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+</head>
+<body>
+
+   <div id="app">
+          <p>{{ message }}</p>
+
+
+        <form class="form-group w-50 p-3" id="myForm" name="myForm">
+
+            <div class="row">
+
+                <div class="col"> Enter Username:
+                    <input class="form-control" type="text" id="username" name="userName">
+                </div>
+                <div class="col"> Enter password:
+                    <input class="form-control" type="text" id="password" name="password">
+                </div>
+            </div>
+
+            <div class="row">
+                <button id = "signinButton" type="button" class="btn btn-primary col m-3" onclick="testLogin()">Sign in</button> <button id = "signupButton" type="button" class="btn btn-success col m-3" onclick="testSignup()">Sign up</button>
+            </div>
+        </form>
+
+
+
+        <form id="uiForm">
+
+        <div class=" form-group row">
+        <label for="selectGamePlayer" class="col-sm-6 col-form-label">select game player:
+        </label>
+
+        <div class="col-sm-5">
+            <select class="form-control" id="selectGamePlayer" name="selectGamePlayer">
+
+                <option>1</option>
+
+                <option>2</option>
+
+                <option>3</option>
+
+                <option>4</option>
+
+                <option>5</option>
+            </select>
+        </div>
+        </div>
+
+            <div class="form-row">
+                <button id="btn"> Show selected games</button>
+            </div>
+        </form>
+
+
+        <form id="shipSelector">
+
+            <div class="form-group row">
+                <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type:
+                </label>
+
+                <div class="col-sm-6">
+                    <select class="form-control" id="shipTypeSelector" name="shipTypeSelector">
+
+                        <option>Destroyer</option>
+
+                        <option>Aircraft Carrier</option>
+
+                        <option>Helicopter</option>
+
+                        <option>Submarine</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="shipDirection" class="col-sm-6 col-form-label">ship direction:
+            </label>
+
+            <div class="col-sm-6">
+                <select class="form-control" id="shipDirection" name="shipDirection">
+
+                    <option>Right</option>
+
+                    <option>Down</option>
+                </select>
+            </div>
+            </div>
+
+            <div class="form-row">
+                <button id="addShipBtn">addShip!</button>
+            </div>
+        </form>
+
+       <div>
+           <ul>
+               <li v-for="(thing, index) in items" :key="index">
+                   {{thing}}
+               </li>
+
+           </ul>
+       </div>
+
+
+   </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="testVue.js"></script>
+</body>
+</html>
