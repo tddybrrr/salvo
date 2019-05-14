@@ -1,33 +1,79 @@
 
 
+import SingleFileComponent from './component.js';
 
 new Vue({
   el: '#app',
   data: {
-    message: 'Hello Vue.js!',
-    items: ["popp", "idk", "wow"]
+    items: ["popp", "idk", "wow"],
+    loggedIn: false
   },
-  created(){
-    function testLogin() {
-        let form = document.getElementById('myForm');
-          fetch('/api/login', {
-                  credentials: 'include',
-                  method: 'POST',
-                  headers: {
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/x-www-form-urlencoded'
-                  },
-                  body: 'userName=' + form[0].value + '&password=' + form[1].value
-              })
-              .then(response => {
-                  console.log(response.status)
-                  if(response.ok){
-                       location.reload();
-                  } else {
-                  alert("Incorrect username or password");
-                  }
-              })
-              .catch(err => console.log(err))
+  components: {
+    SingleFileComponent
+  },
+  methods: {
+    doSomething: function (thing){
+        alert(thing)
+    },
+    testLogin: function(){
+      let form = document.getElementById('signInUp');
+      fetch('/api/login', {
+              credentials: 'include',
+              method: 'POST',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: 'userName=' + form[0].value + '&password=' + form[1].value
+          })
+          .then(response => {
+              if(response.ok){
+                  this.loggedIn=true;
+              } else {
+              alert("Incorrect username or password");
+              }
+          })
+          .catch(err => console.log(err))
+    },
+    testSignup: function(){
+        let form = document.getElementById('signInUp');
+        fetch('/api/players', {
+              credentials: 'include',
+              method: 'POST',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: 'userName=' + form[0].value + '&password=' + form[1].value
+          })
+          .then(response => response.json())
+          .then(response => {
+              if (response == null){
+                    console.log(response);
+                  this.testLogin();
+              }
+          })
+          .catch(err => alert(err))
+    },
+    testLogout: function(){
+      fetch('/api/logout', {
+              credentials: 'include',
+              method: 'POST',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              },
+          })
+          .then(response => {
+              console.log(response);
+              if(response.ok){
+//                document.location.reload(true);
+                 alert("logged out!");
+                 this.loggedIn=false;
+              }
+          })
+          .catch(err => console.log(err))
     }
   }
 })
+

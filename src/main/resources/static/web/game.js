@@ -110,8 +110,6 @@ function buildUI(){
     event.preventDefault();
     addShip();
     });
-
-
 }
 
 function show_selected() {

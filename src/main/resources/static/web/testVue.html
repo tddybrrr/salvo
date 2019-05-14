@@ -8,13 +8,8 @@
 <body>
 
    <div id="app">
-          <p>{{ message }}</p>
-
-
-        <form class="form-group w-50 p-3" id="myForm" name="myForm">
-
+        <form v-if="loggedIn == false" class="form-group w-50 p-3" id="signInUp" name="signInUp">
             <div class="row">
-
                 <div class="col"> Enter Username:
                     <input class="form-control" type="text" id="username" name="userName">
                 </div>
@@ -22,95 +17,53 @@
                     <input class="form-control" type="text" id="password" name="password">
                 </div>
             </div>
-
             <div class="row">
-                <button id = "signinButton" type="button" class="btn btn-primary col m-3" onclick="testLogin()">Sign in</button> <button id = "signupButton" type="button" class="btn btn-success col m-3" onclick="testSignup()">Sign up</button>
+                <button id = "signinButton" type="button"  v-on:click="testLogin">Sign in</button>
+                <button id = "signupButton" type="button"  v-on:click="testSignup">Sign up</button>
             </div>
         </form>
 
 
+        <div v-if="loggedIn == true" id="userInterface">
 
-        <form id="uiForm">
+            <button id="logOutButton" v-on:click="testLogout"> Log Out</button>
 
-        <div class=" form-group row">
-        <label for="selectGamePlayer" class="col-sm-6 col-form-label">select game player:
-        </label>
+             <single-file-component></single-file-component>
 
-        <div class="col-sm-5">
-            <select class="form-control" id="selectGamePlayer" name="selectGamePlayer">
-
-                <option>1</option>
-
-                <option>2</option>
-
-                <option>3</option>
-
-                <option>4</option>
-
-                <option>5</option>
-            </select>
-        </div>
-        </div>
-
-            <div class="form-row">
-                <button id="btn"> Show selected games</button>
-            </div>
-        </form>
-
-
-        <form id="shipSelector">
-
-            <div class="form-group row">
-                <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type:
-                </label>
-
-                <div class="col-sm-6">
-                    <select class="form-control" id="shipTypeSelector" name="shipTypeSelector">
-
-                        <option>Destroyer</option>
-
-                        <option>Aircraft Carrier</option>
-
-                        <option>Helicopter</option>
-
-                        <option>Submarine</option>
-                    </select>
+            <form id="shipSelector">
+                <div class="form-group row">
+                    <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type:
+                    </label>
+                    <div class="col-sm-6">
+                        <select class="form-control" id="shipTypeSelector" name="shipTypeSelector">
+                            <option>Destroyer</option>
+                            <option>Aircraft Carrier</option>
+                            <option>Helicopter</option>
+                            <option>Submarine</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-
-            <div class="form-group row">
-                <label for="shipDirection" class="col-sm-6 col-form-label">ship direction:
-            </label>
-
-            <div class="col-sm-6">
-                <select class="form-control" id="shipDirection" name="shipDirection">
-
-                    <option>Right</option>
-
-                    <option>Down</option>
-                </select>
-            </div>
-            </div>
-
-            <div class="form-row">
-                <button id="addShipBtn">addShip!</button>
-            </div>
-        </form>
-
-       <div>
-           <ul>
-               <li v-for="(thing, index) in items" :key="index">
-                   {{thing}}
-               </li>
-
-           </ul>
-       </div>
-
-
+                <div class="form-group row">
+                    <label for="shipDirection" class="col-sm-6 col-form-label">ship direction:
+                    </label>
+                    <div class="col-sm-6">
+                        <select class="form-control" id="shipDirection" name="shipDirection">
+                            <option>Right</option>
+                            <option>Down</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <button id="addShipBtn">addShip!</button>
+                </div>
+            </form>
+        </div>
    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="testVue.js"></script>
+   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="module" src="testVue.js"></script>
+   <script type="module" src="component.js"></script>
+
 </body>
 </html>
