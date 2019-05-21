@@ -1,0 +1,22 @@
+
+
+td, tr, th {
+    border: solid 1px black;
+    width: 1em;
+    height: 1em;
+}
+
+#daGrids {
+display: flex;
+flex-direction: row;
+justify-content: space-around;
+}
+.table {
+    border: solid 1em grey;
+}
+
+#selectors{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}

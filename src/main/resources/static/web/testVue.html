@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
+    <link rel="stylesheet" href="testVue.css">
 </head>
 <body>
 
    <div id="app">
+       <a href="/web/games.html">First person view</a>
+        <br>
         <form v-if="loggedIn == false" class="form-group w-50 p-3" id="signInUp" name="signInUp">
             <div class="row">
                 <div class="col"> Enter Username:
@@ -17,6 +20,7 @@
                     <input class="form-control" type="text" id="password" name="password">
                 </div>
             </div>
+            <br>
             <div class="row">
                 <button id = "signinButton" type="button"  v-on:click="testLogin">Sign in</button>
                 <button id = "signupButton" type="button"  v-on:click="testSignup">Sign up</button>
@@ -30,33 +34,7 @@
 
              <single-file-component></single-file-component>
 
-            <form id="shipSelector">
-                <div class="form-group row">
-                    <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type:
-                    </label>
-                    <div class="col-sm-6">
-                        <select class="form-control" id="shipTypeSelector" name="shipTypeSelector">
-                            <option>Destroyer</option>
-                            <option>Aircraft Carrier</option>
-                            <option>Helicopter</option>
-                            <option>Submarine</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group row">
-                    <label for="shipDirection" class="col-sm-6 col-form-label">ship direction:
-                    </label>
-                    <div class="col-sm-6">
-                        <select class="form-control" id="shipDirection" name="shipDirection">
-                            <option>Right</option>
-                            <option>Down</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <button id="addShipBtn">addShip!</button>
-                </div>
-            </form>
+
         </div>
    </div>
 

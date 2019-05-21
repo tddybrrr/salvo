@@ -25,6 +25,9 @@ public class SalvoController {
     @Autowired
     private ShipRepository shipsRepo;
 
+     @Autowired
+    private SalvoRepository salvoeRepo;
+
     private boolean isGuest(Authentication authentication) {
         return authentication == null || authentication instanceof AnonymousAuthenticationToken;
     }
@@ -85,8 +88,8 @@ public class SalvoController {
             });
 
             gamesMap.put("gameID", each.getId());
+            gamesMap.put("gameHour", each.getGameTime().getHour());
             gamesMap.put("gameMinute", each.getGameTime().getMinute());
-            gamesMap.put("gameNano", each.getGameTime().getNano());
             gamesMap.put("gamePlayers", gpObject);
             gamesObject.add(gamesMap);
         });
@@ -108,9 +111,20 @@ public class SalvoController {
         return finalMapOfGames;
     }
 
+
+    @RequestMapping(path = "/CurrentPlayersGames")
+    public List<Long> getCurrentPlayersGames(Authentication auth) {
+        ArrayList<Long> list = new ArrayList<>();
+        Player currentPlayer = getAuthenticatedPlayer(auth);
+
+        currentPlayer.getGamePlayers().stream().forEach(gamePlayer -> {
+            list.add(gamePlayer.getId());
+        });
+            return list;
+    }
+
     @RequestMapping(path = "/games", method = RequestMethod.POST)
     public ResponseEntity<Map<String, Object>> createNewGame(Authentication authentication) {
-
 
         if (getAuthenticatedPlayer(authentication).getuserName()== null){
             return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
@@ -157,13 +171,16 @@ public class SalvoController {
         return playerMap;
     }
 
+
+
     @RequestMapping("/gamePlayers")
     public Map<String, Object> getGamePlayers() {
         List<Object> gamePlayerObj = new ArrayList<>();
         gamePlayerRepo.findAll().stream().forEach(gamePlaya -> {
-            Map<Long, Object> gamePlayasMap = new HashMap<>();
-            gamePlayasMap.put(gamePlaya.getId(), gamePlaya.getShips());
-            gamePlayerObj.add(gamePlayasMap);
+            Map<Long, Object> aMap = new HashMap<>();
+            aMap.put(gamePlaya.getId(), getShipsfromGamePlayer(gamePlaya) );
+            gamePlayerObj.add(aMap);
+//            gamePlayerObj.add(getShipsfromGamePlayer(gamePlaya));
         });
         Map<String, Object> playerMap = new HashMap<>();
         playerMap.put("gamePlayers", gamePlayerObj);
@@ -265,7 +282,7 @@ public class SalvoController {
     @RequestMapping(path = "/games/players/{gamePlayerId}/ships", method=RequestMethod.POST)
      public ResponseEntity<Map<String, Object>> addShips(@PathVariable long gamePlayerId,
                                                           Authentication authentication,
-                                                          @RequestBody ArrayList<Ship> shipArray) {
+                                                          @RequestBody Ship sentShip) {
         // there is no current user logged in, or
         if (getAuthenticatedPlayer(authentication).getuserName()== null){
             return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
@@ -284,15 +301,43 @@ public class SalvoController {
          else {
              GamePlayer currentGP = gamePlayerRepo.getOne(gamePlayerId);
              Map<Object,Object> results = new HashMap<>();
-             shipArray.forEach(ship -> {
+              currentGP.addShip(sentShip);
+             shipsRepo.save(sentShip);
 
-                 shipsRepo.save(ship);
-                 currentGP.addShip(ship);
-                 results.put(ship.getId(), ship.getlocation());
-             });
+             results.put(sentShip.getId(), sentShip.getlocation());
 
-             // created is a 201 response FYI
             return new ResponseEntity<>(makeMapForResponseEntity("addedShips", results), HttpStatus.CREATED);
+        }
+    }
+
+    @RequestMapping(path = "/games/players/{gamePlayerId}/salvoes", method=RequestMethod.POST)
+     public ResponseEntity<Map<String, Object>> addSalvoes(@PathVariable long gamePlayerId,
+                                                          Authentication authentication,
+                                                          @RequestBody Salvo shot) {
+        // there is no current user logged in, or
+        if (getAuthenticatedPlayer(authentication).getuserName()== null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
+
+            //there is no game player with the given ID, or
+        } else if (gamePlayerRepo.findOne(gamePlayerId) == null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "no such game player"), HttpStatus.UNAUTHORIZED);
+
+        //the current user is not the game player the ID references
+        }  else if (getAuthenticatedPlayer(authentication).getGamePlayers().stream().allMatch(
+                gamePlayer -> gamePlayer.getId() == gamePlayerId)
+                  ) {
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "not your game"), HttpStatus.UNAUTHORIZED);
+        }
+        //add ships
+         else {
+             GamePlayer currentGP = gamePlayerRepo.getOne(gamePlayerId);
+             Map<Object,Object> results = new HashMap<>();
+              currentGP.addSalvo(shot);
+             salvoeRepo.save(shot);
+
+             results.put(shot.getId(), shot.getLocations());
+
+            return new ResponseEntity<>(makeMapForResponseEntity("ShotsFired", results), HttpStatus.CREATED);
         }
     }
 

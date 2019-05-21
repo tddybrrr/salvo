@@ -45,7 +45,8 @@ function createGame(){
       .then(response =>  response.json())
       .then(data => {
             if (data !== "undefined"){
-             window.location.href = "game.html?gp=" + data.newGpID;
+//             window.location.href = "game.html?gp=" + data.newGpID;
+                location.reload();
             } else {
                alert("You must be logged-in to do this");
             }
@@ -68,11 +69,14 @@ function buildOverview(games){
 
            var link = document.createElement('a');
 
+            var gameNotReady;
+
            if (games[i].gamePlayers[0]=== undefined){
               link.innerHTML="N/A"
+              gameNotReady=true;
            } else {
               link.innerHTML=games[i].gamePlayers[0].gpName;
-             link.href="/web/game.html?gp=" + games[i].gamePlayers[0].gpID;
+             link.href="/web/testVue.html?gp=" + games[i].gamePlayers[0].gpID;
             }
            cell.appendChild(link);
 
@@ -80,21 +84,32 @@ function buildOverview(games){
            var link = document.createElement('a');
             if (games[i].gamePlayers[1] === undefined){
                      link.innerHTML="N/A"
+                    gameNotReady=true;
             } else {
           link.innerHTML=games[i].gamePlayers[1].gpName;
-          link.href="/web/game.html?gp=" + games[i].gamePlayers[1].gpID;
+          link.href="/web/testVue.html?gp=" + games[i].gamePlayers[1].gpID;
           }
 
           cell.appendChild(link);
            var cell = row.insertCell(3);
-           cell.innerHTML=games[i].gameMinute;
+           var addZero = '';
+           if (games[i].gameMinute < 10){
+                var addZero = 0;
+           }
+           cell.innerHTML=games[i].gameHour + ":" + addZero + games[i].gameMinute;
             var cell = row.insertCell(4);
+
+
             var button = document.createElement('BUTTON');
-            button.innerHTML = "JOIN"
+            if (gameNotReady){
+                 button.innerHTML = "JOIN"
+            } else {
+                 button.innerHTML = "VIEW"
+            }
 
             var gameIDnumber = games[i].gameID;
             button.onclick=function(){joinGame(gameIDnumber)};
-           cell.appendChild(button);
+            cell.appendChild(button);
      }
 
        var header = table.createTHead();
@@ -108,7 +123,7 @@ function buildOverview(games){
        var cell = row.insertCell(3);
        cell.innerHTML="Game Time"
         var cell = row.insertCell(4);
-       cell.innerHTML="Join game"
+       cell.innerHTML="Action"
     }
 
 

@@ -1,20 +1,35 @@
 
-
 import SingleFileComponent from './component.js';
 
 new Vue({
   el: '#app',
   data: {
-    items: ["popp", "idk", "wow"],
     loggedIn: false
   },
   components: {
     SingleFileComponent
   },
+  created(){
+        fetch('/api/games', {
+              credentials: 'include',
+              method: 'GET',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              }
+          })
+          .then(response => response.json())
+          .then(response => {
+          //if some one is logged in, build the user interface
+              if(response.player != null){
+               this.loggedIn=true;
+              //if some no one is logged in, build the sign-up form
+              }
+          })
+          .catch(err => console.log(err))
+  },
   methods: {
-    doSomething: function (thing){
-        alert(thing)
-    },
+
     testLogin: function(){
       let form = document.getElementById('signInUp');
       fetch('/api/login', {
@@ -48,9 +63,12 @@ new Vue({
           })
           .then(response => response.json())
           .then(response => {
-              if (response == null){
-                    console.log(response);
-                  this.testLogin();
+              console.log(response);
+              if (Object.keys(response)[0] == "error"){
+                    alert(response.error);
+              } else {
+//                  this.testLogin();
+                    alert("account created: " + Object.values(response)[0]);
               }
           })
           .catch(err => alert(err))

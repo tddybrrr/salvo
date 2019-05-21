@@ -139,11 +139,8 @@ function testLogout(){
 
 //-----------------------------------------------------------------------------------
 
-
-
-
 function addShip(){
-
+//
 //    var type = document.getElementById('shipTypeSelector');
 //    var value = selector.value;
 //    console.log(value);
