@@ -5,26 +5,27 @@ export default {
   <div>
     <div id="gridZone">
          <h1>{{name}}</h1>
+             <h4 v-if="isNewGame"> Set up your new game below </h4>
+
              <select v-model="selected" v-on:change="makeGameView">
                   <option disabled value="">Please select one</option>
                   <option v-for="(item, index) in ids" :key="index"> {{item}}</option>
             </select>
+               <br>
+                <hr>
+                <br>
     </div>
-
     <br>
     <hr>
     <br>
     <div id=selectors>
-         <form id="shipSelector">
+         <form id="shipSelector" v-if="isNewGame">
             <div class="form-group row">
                 <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type:
                 </label>
                 <div class="col-sm-6">
                     <select v-model="shipType" id="shipTypeSelector" name="shipTypeSelector">
-                        <option value="4">Destroyer (4)</option>
-                        <option value="5">Aircraft Carrier (5)</option>
-                        <option value="2">Helicopter (2)</option>
-                        <option value="3">Submarine (3)</option>
+                        <option v-for="(item, index) in shipList" :key="index" :value="item.shipsLength"> {{item.shipTypeName}} ({{item.shipsLength}}) </option>
                     </select>
                 </div>
             </div>
@@ -33,7 +34,6 @@ export default {
                 <label class="col-sm-6 col-form-label">ship direction:
                 </label>
                 <div class="col-sm-6">
-
                     <input type="checkbox" id="goingRight" v-model="goingRight">
                         <label for="goingRight">Is the ship going right? {{ goingRight }}</label>
                 </div>
@@ -50,7 +50,7 @@ export default {
             </div>
         </form>
 
-        <form id="shotSelector">
+        <form id="shotSelector" v-else>
             <input id="shot" v-model="shot" placeholder="type where you shooting">
               <button type="button" id="addShot" v-on:click="shots.push(shot)"> enter a shot </button>
               <ul>
@@ -58,20 +58,31 @@ export default {
               </ul>
                <button type="button" id="addShot" v-on:click="shoot"> submit all shots</button>
         </form>
+      <button type="button" id="test" v-on:click="test"> test</button>
+
     </div>
+
 </div>
   `,
   data() {
     return {
       name: 'Choose a game',
       selected: 1,
+      /// GamePlayer ids for the currently loggedn player
       ids: [],
       shipType: null,
+      shipList: [
+               {shipTypeName: "Helicopter", shipsLength: 2},
+               {shipTypeName: "Submarine", shipsLength: 3},
+               {shipTypeName: "Destoryer", shipsLength: 4},
+               {shipTypeName: "Aircraft Carrier", shipsLength: 5},
+      ],
       goingRight: null,
       shipPoint: null,
       isNewGame: null,
       shot: null,
-      shots: []
+      shots: [],
+      turn: null
     }
   },
   created(){
@@ -84,12 +95,13 @@ export default {
                 })
                 .then(response => response.json())
                 .then(gpData => {
+
+            /// GamePlayer ids for the currently loggedn player
                    this.ids = gpData;
                 }).catch(function(error) {
                   // called when an error occurs anywhere in the chain
                   console.log(error);
                 });
-
                  if (window.location.href.indexOf('gp=') == -1){
                     this.$emit('update', 'no GP in url');
 
@@ -102,8 +114,30 @@ export default {
   },
   methods:{
 
+    deleteItem: function(index){
+        this.$delete(this.shipList, index)
+    },
+
+    test: function(){
+        var selected = this.selected;
+        fetch('/api/games/players/' + selected + '/salvoes', {
+                  credentials: 'include',
+                  method: 'GET',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  }
+              })
+              .then(response => response.json())
+              .then(function(data) {
+                console.log(data)
+            })
+                .catch(err => console.log(err))
+    },
+
     shoot: function(){
                 var shots = this.shots
+                var turn;
                 var anObject =  { "turn": 0, "location": shots };
                 var selected = this.selected;
 
@@ -133,15 +167,23 @@ export default {
             })
             .then(response => response.json())
             .then(gpData => {
+                console.log(gpData);
                 if (gpData.error === "FORBIDDEN"){
                      alert("not your game bro");
                 } else if (gpData.error === "Unauthorized"){
                     alert("not logged in");
                 }
-                else  {
+                else if (gpData.game_player[0].ships.length == 0 || gpData.opponentInformation.length == 0 ){
+                    this.isNewGame=true;
+                    this.emptyGrid();
+                    return;
+                    }
+                 else {
+                    this.isNewGame=false;
                     this.name = gpData.game_player[0].realName + "'s View";
                     this.build(gpData);
-                }
+                 }
+
             }).catch(function(error) {
               // called when an error occurs anywhere in the chain
               console.log(error);
@@ -194,7 +236,6 @@ export default {
             }
             console.log(newArr);
             var anObject =  { "shipType": shipTypeText, "location": newArr };
-
 //            var gamePlayerId = 1;
             fetch('/api/games/players/' + this.selected + '/ships', {
                   credentials: 'include',
@@ -209,11 +250,12 @@ export default {
               .then(response => response.json())
               .then(function(data) {
                 console.log(data);
-                location.reload();
+//                location.reload();
             })
                 .catch(err => console.log(err))
     },
-    build: function(data){
+
+    emptyGrid: function(){
 
         var gridZone = document.getElementById('gridZone');
         var daGrids = document.getElementById('daGrids');
@@ -231,11 +273,112 @@ export default {
         var myGrid = document.createElement("table");
         myGrid.classList.add("table", "table-bordered");
         var myGridTitle = document.createElement('caption');
-        myGridTitle.innerHTML = "my grid";
+        myGridTitle.innerHTML = "Select ship placement";
 
         myGrid.id="myGrid";
         daGrids.appendChild(myGrid);
 
+        var whereIveShot = document.createElement("table");
+        whereIveShot.classList.add("table", "table-dark",  "table-bordered")
+        var whereIveShotTitle = document.createElement('caption');
+        whereIveShotTitle.innerHTML = "Select shot placement";
+
+        whereIveShot.id="whereIveShot";
+        daGrids.appendChild(whereIveShot);
+
+        var letters = ["", "a", "b", "c", "d", "e", "f", "g", "h"];
+
+        for (var i=0; i< 9; i++){
+            var rowMy = myGrid.insertRow(i);
+            var rowShot = whereIveShot.insertRow(i);
+
+            // first row of letters
+            if (i==0){
+                for (var c=0; c<9; c++){
+                    var cellMy = rowMy.insertCell(c);
+                    var cellShot = rowShot.insertCell(c);
+
+                    cellMy.innerHTML=letters[c];
+                    cellMy.style.fontWeight="bold";
+
+                    cellShot.innerHTML=letters[c];
+                    cellShot.style.fontWeight="bold";
+                }
+            // rest of the rows
+            } else if (i>0) {
+                // fill left-most cell with row number
+                var cellMy = rowMy.insertCell(0);
+                cellMy.innerHTML=i;
+                cellMy.style.fontWeight="bold";
+
+                var cellShot = rowShot.insertCell(0);
+                cellShot.innerHTML=i;
+                cellShot.style.fontWeight="bold";
+                // fill main grid with letter/number coordinates
+                for (var g=1; g<9; g++){
+                    var cellMy = rowMy.insertCell(g);
+                    cellMy.innerHTML="x"
+                    var cellShot = rowShot.insertCell(g);
+                    cellShot.innerHTML="x"
+                }
+            }
+        }
+        myGrid.appendChild(myGridTitle);
+        whereIveShot.appendChild(whereIveShotTitle);
+    },
+    build: function(data){
+
+        var gridZone = document.getElementById('gridZone');
+        var daGrids = document.getElementById('daGrids');
+
+        // deletes innerHTML if a grid was built before
+        if (daGrids){
+            daGrids.innerHTML="";
+        } else {
+            var daGrids = document.createElement('div');
+                daGrids.id="daGrids";
+        }
+
+        //area for game views grids
+        gridZone.appendChild(daGrids);
+
+        // build grid of my ship locations
+        var myGrid = document.createElement("table");
+        myGrid.classList.add("table", "table-bordered");
+        var myGridTitle = document.createElement('caption');
+        myGridTitle.innerHTML = "my grid";
+        myGrid.id="myGrid";
+        daGrids.appendChild(myGrid);
+
+        // build score table
+
+//        var scoreTable = document.createElement("table");
+//        daGrids.appendChild(scoreTable);
+//         var scoreBoardTitle = document.createElement('caption');
+//        scoreBoardTitle.innerHTML = "scoreboard";
+//        scoreTable.appendChild(scoreBoardTitle);
+
+        //  scoreTable.classList.add("table", "table-dark",  "table-bordered");
+//        var header = scoreTable.createTHead();
+        // Create an empty <tr> element and add it to the first position of <thead>:
+//        var row = header.insertRow(0);
+//        var cell = row.insertCell(0);
+//        cell.colSpan="4";
+//        cell.innerHTML="header maybe?";
+//         var cell = row.insertCell(1);
+//        cell.colSpan="4";
+//        cell.innerHTML="header maybe?";
+
+//        for (let s = 0; s<4; s++){
+//             let row = scoreTable.insertRow(i);
+//               for (let g = 0; g<8; g++){
+//                    let cell = row.insertCell(g);
+//            }
+//        }
+
+
+
+         // build grid of my sots against my opponent
         var whereIveShot = document.createElement("table");
         whereIveShot.classList.add("table", "table-dark",  "table-bordered")
         var whereIveShotTitle = document.createElement('caption');

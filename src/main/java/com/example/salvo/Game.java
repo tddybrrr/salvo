@@ -48,12 +48,9 @@ public class Game {
         return this.scores;
     }
 
-
     public Set<Score> getScores() {
         return scores;
     }
-
-
 
     public LocalDateTime getGameTime() {
         return gameTime;

@@ -25,7 +25,6 @@ public class Salvo {
     @Column(name="location")
     private List<String> location = new ArrayList<>();
 
-
     public Salvo() {}
 
     public Salvo(Integer turn) {
@@ -63,11 +62,8 @@ public class Salvo {
                 ", gamePlayer=" + gamePlayer +
                 '}';
     }
-
     @JsonIgnore
     public GamePlayer getGamePlayer() {
         return this.gamePlayer;
     }
-
-
 }
