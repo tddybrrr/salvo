@@ -171,6 +171,26 @@ fetch( "http://localhost:8080/api/games",{
         console.log( "Request failed: " + error.message );
 });
 
+function logout(){
+      fetch('/api/logout', {
+              credentials: 'include',
+              method: 'POST',
+              headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded'
+              },
+          })
+          .then(response => {
+              console.log(response);
+              if(response.ok){
+//                document.location.reload(true);
+                 alert("logged out!");
+                 this.loggedIn=false;
+              }
+          })
+          .catch(err => console.log(err))
+    }
+
 
 
 

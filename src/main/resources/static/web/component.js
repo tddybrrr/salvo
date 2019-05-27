@@ -2,7 +2,7 @@
 
 export default {
   template: `
-  <div>
+  <div >
     <div id="gridZone">
          <h1>{{name}}</h1>
              <h4 v-if="isNewGame"> Set up your new game below </h4>
@@ -57,9 +57,8 @@ export default {
                 <li v-for="(item, index) in shots" :key="index"> {{ item }} </li>
               </ul>
                <button type="button" id="addShot" v-on:click="shoot"> submit all shots</button>
+                    <h2> TURN: {{turn}} </h2>
         </form>
-      <button type="button" id="test" v-on:click="test"> test</button>
-
     </div>
 
 </div>
@@ -95,30 +94,27 @@ export default {
                 })
                 .then(response => response.json())
                 .then(gpData => {
-
             /// GamePlayer ids for the currently loggedn player
                    this.ids = gpData;
+                   this.selected =gpData[0];
                 }).catch(function(error) {
                   // called when an error occurs anywhere in the chain
                   console.log(error);
                 });
                  if (window.location.href.indexOf('gp=') == -1){
-                    this.$emit('update', 'no GP in url');
-
+                     this.makeGameView();
+                     this.checkTurn();
                 } else {
                     var url = window.location.href;
                     var gpNum = url.split('gp=').pop();
                     this.selected=gpNum;
                     this.makeGameView();
+                     this.checkTurn();
+
                 }
   },
   methods:{
-
-    deleteItem: function(index){
-        this.$delete(this.shipList, index)
-    },
-
-    test: function(){
+    checkTurn: function(){
         var selected = this.selected;
         fetch('/api/games/players/' + selected + '/salvoes', {
                   credentials: 'include',
@@ -129,16 +125,41 @@ export default {
                   }
               })
               .then(response => response.json())
-              .then(function(data) {
-                console.log(data)
+              .then(data => {
+                console.log(data.turns)
+                this.turn = data.turns.length;
             })
                 .catch(err => console.log(err))
+    },
+    checkSunk: function(someInfo){
+            var theirShips = someInfo.opponentInformation[0].enemyShips;
+//            console.log(theirShips);
+            // each ship
+            for (let i = 0; i<theirShips.length; i++){
+                var hits = 0;
+                // the locations of each ship's square
+                 for (let x = 0; x<theirShips[i].location.length; x++){
+                    // loop through every single turn
+                    for (let h = 0; h<someInfo.game_player[0].salvoes.length; h++){
+                        // loop though
+                        for (let y = 0; y<someInfo.game_player[0].salvoes[h].location.length; y++){
+                           if (theirShips[i].location[x] == someInfo.game_player[0].salvoes[h].location[y]){
+                             hits++;
+                             if (hits == theirShips[i].location.length){
+                                console.log("sunken Ship: " + theirShips[i].type);
+                                }
+                            }
+                        }
+                    }
+                 }
+            }
+            console.log(someInfo.game_player[0].salvoes);
     },
 
     shoot: function(){
                 var shots = this.shots
-                var turn;
-                var anObject =  { "turn": 0, "location": shots };
+                var currentTurn = this.turn+1;
+                var anObject =  { "turn": currentTurn, "location": shots };
                 var selected = this.selected;
 
                fetch('/api/games/players/' + selected + '/salvoes', {
@@ -151,9 +172,10 @@ export default {
                 body: JSON.stringify(anObject)
               })
               .then(response => response.json())
-              .then(function(data) {
-                window.location.href="/web/testVue.html?gp=" + selected;
-//                location.reload();
+              .then(data => {
+//                window.location.href="/web/testVue.html?gp=" + selected;
+                this.checkTurn();
+                location.reload();
             })
                 .catch(err => console.log(err))
     },
@@ -182,6 +204,8 @@ export default {
                     this.isNewGame=false;
                     this.name = gpData.game_player[0].realName + "'s View";
                     this.build(gpData);
+                    this.checkSunk(gpData);
+                     this.checkTurn();
                  }
 
             }).catch(function(error) {
@@ -258,6 +282,7 @@ export default {
     emptyGrid: function(){
 
         var gridZone = document.getElementById('gridZone');
+
         var daGrids = document.getElementById('daGrids');
 
         // deletes innerHTML if a grid was built before
@@ -278,31 +303,31 @@ export default {
         myGrid.id="myGrid";
         daGrids.appendChild(myGrid);
 
-        var whereIveShot = document.createElement("table");
-        whereIveShot.classList.add("table", "table-dark",  "table-bordered")
-        var whereIveShotTitle = document.createElement('caption');
-        whereIveShotTitle.innerHTML = "Select shot placement";
+//        var whereIveShot = document.createElement("table");
+//        whereIveShot.classList.add("table", "table-dark",  "table-bordered")
+//        var whereIveShotTitle = document.createElement('caption');
+//        whereIveShotTitle.innerHTML = "Select shot placement";
 
-        whereIveShot.id="whereIveShot";
-        daGrids.appendChild(whereIveShot);
+//        whereIveShot.id="whereIveShot";
+//        daGrids.appendChild(whereIveShot);
 
         var letters = ["", "a", "b", "c", "d", "e", "f", "g", "h"];
 
         for (var i=0; i< 9; i++){
             var rowMy = myGrid.insertRow(i);
-            var rowShot = whereIveShot.insertRow(i);
+//            var rowShot = whereIveShot.insertRow(i);
 
             // first row of letters
             if (i==0){
                 for (var c=0; c<9; c++){
                     var cellMy = rowMy.insertCell(c);
-                    var cellShot = rowShot.insertCell(c);
+//                    var cellShot = rowShot.insertCell(c);
 
                     cellMy.innerHTML=letters[c];
                     cellMy.style.fontWeight="bold";
 
-                    cellShot.innerHTML=letters[c];
-                    cellShot.style.fontWeight="bold";
+//                    cellShot.innerHTML=letters[c];
+//                    cellShot.style.fontWeight="bold";
                 }
             // rest of the rows
             } else if (i>0) {
@@ -311,24 +336,34 @@ export default {
                 cellMy.innerHTML=i;
                 cellMy.style.fontWeight="bold";
 
-                var cellShot = rowShot.insertCell(0);
-                cellShot.innerHTML=i;
-                cellShot.style.fontWeight="bold";
+//                var cellShot = rowShot.insertCell(0);
+//                cellShot.innerHTML=i;
+//                cellShot.style.fontWeight="bold";
                 // fill main grid with letter/number coordinates
                 for (var g=1; g<9; g++){
                     var cellMy = rowMy.insertCell(g);
                     cellMy.innerHTML="x"
-                    var cellShot = rowShot.insertCell(g);
-                    cellShot.innerHTML="x"
+                    cellMy.id=letters[g]+i;
+//                    var cellShot = rowShot.insertCell(g);
+//                    cellShot.innerHTML="x"
                 }
             }
         }
         myGrid.appendChild(myGridTitle);
-        whereIveShot.appendChild(whereIveShotTitle);
+//        whereIveShot.appendChild(whereIveShotTitle);
+        var allCells = document.getElementsByTagName("td");
+
+        for (var i = 0; i < allCells.length; i++) {
+            allCells[i].addEventListener('click', function() {
+
+                console.log(this.id);
+            });
+        }
     },
     build: function(data){
 
         var gridZone = document.getElementById('gridZone');
+
         var daGrids = document.getElementById('daGrids');
 
         // deletes innerHTML if a grid was built before
@@ -350,33 +385,33 @@ export default {
         myGrid.id="myGrid";
         daGrids.appendChild(myGrid);
 
-        // build score table
+//         build score table
 
-//        var scoreTable = document.createElement("table");
-//        daGrids.appendChild(scoreTable);
-//         var scoreBoardTitle = document.createElement('caption');
-//        scoreBoardTitle.innerHTML = "scoreboard";
-//        scoreTable.appendChild(scoreBoardTitle);
+        var scoreTable = document.createElement("table");
+        daGrids.appendChild(scoreTable);
+         var scoreBoardTitle = document.createElement('caption');
+        scoreBoardTitle.innerHTML = "scoreboard";
+        scoreTable.appendChild(scoreBoardTitle);
 
-        //  scoreTable.classList.add("table", "table-dark",  "table-bordered");
-//        var header = scoreTable.createTHead();
-        // Create an empty <tr> element and add it to the first position of <thead>:
-//        var row = header.insertRow(0);
-//        var cell = row.insertCell(0);
-//        cell.colSpan="4";
-//        cell.innerHTML="header maybe?";
-//         var cell = row.insertCell(1);
-//        cell.colSpan="4";
-//        cell.innerHTML="header maybe?";
+          scoreTable.classList.add("table", "table-dark",  "table-bordered");
+        var header = scoreTable.createTHead();
+//         Create an empty <tr> element and add it to the first position of <thead>:
+        var row = header.insertRow(0);
+        var cell = row.insertCell(0);
+        cell.colSpan="4";
+        cell.innerHTML="Ship Type";
+         var cell = row.insertCell(1);
+        cell.colSpan="4";
+        cell.innerHTML="HP";
 
-//        for (let s = 0; s<4; s++){
-//             let row = scoreTable.insertRow(i);
-//               for (let g = 0; g<8; g++){
-//                    let cell = row.insertCell(g);
-//            }
-//        }
-
-
+        for (let s = 0; s<data.opponentInformation[0].enemyShips.length; s++){
+             let row = scoreTable.insertRow(i);
+               for (let g = 0; g<2; g++){
+                    let cell = row.insertCell(g);
+                    cell.colSpan="4";
+                    cell.innerHTML=data.opponentInformation[0].enemyShips[s].type;
+            }
+        }
 
          // build grid of my sots against my opponent
         var whereIveShot = document.createElement("table");
@@ -442,6 +477,7 @@ export default {
 
                              for (let b=0; b<data.game_player[0].salvoes.length; b++){
                                 for (let h=0; h < data.game_player[0].salvoes[b].location.length; h++){
+                                    cellShot.id=letters[g]+i;
                                     if (data.game_player[0].salvoes[b].location[h] == letters[g]+i){
                                     cellShot.innerHTML = "x" + data.game_player[0].salvoes[b].turn;
                                         if (data.opponentInformation[0].enemyShips[p].location[x] == data.game_player[0].salvoes[b].location[h]){
@@ -457,6 +493,21 @@ export default {
         }
         myGrid.appendChild(myGridTitle);
         whereIveShot.appendChild(whereIveShotTitle);
+          var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
+                return eachCell.id !== '';
+          });
+//          console.log(allCells);
+        for (var i = 0; i < allCells.length; i++) {
+            allCells[i].addEventListener('click', function() {
+                var targetCell =  document.getElementById(this.id);
+                var targetPic = new Image();
+                targetPic.src = 'https://a.wattpad.com/useravatar/target.256.882874.jpg';
+                targetPic.style.display = "block";
+                targetPic.style.width="100%";
+                targetCell.appendChild(targetPic);
+//                console.log(this.id);
+            });
+        }
     }
   }
 }

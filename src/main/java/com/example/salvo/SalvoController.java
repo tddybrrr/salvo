@@ -292,6 +292,7 @@ public class SalvoController {
             shipsMap.put("ShipID", ship.getId());
             shipsMap.put("ShipLocation", ship.getlocation());
             shipsMap.put("ShipType", ship.getShipType());
+            shipsMap.put("sunk?", ship.isSunk());
             shipObject.add(shipsMap);
         });
         Map<String, Object> finalShipMap = new HashMap<>();
@@ -367,6 +368,7 @@ public class SalvoController {
             Map<String, Object> ships = new HashMap<>();
             ships.put("location", ship.getlocation());
             ships.put("type", ship.getShipType());
+            ships.put("sunk?", ship.isSunk());
             shipsObj.add(ships);
         });
         return shipsObj;

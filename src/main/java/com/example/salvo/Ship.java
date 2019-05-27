@@ -17,6 +17,8 @@ public class Ship {
 
     private String shipType;
 
+    private boolean sunk = false;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="gamePlayerID")
     private GamePlayer gamePlayer;
@@ -63,6 +65,13 @@ public class Ship {
 
     public void setlocation(List<String> location) {
         this.location = location;
+    }
+
+    public boolean isSunk() {
+        return sunk;
+    }
+    public void setSunk(boolean sunk) {
+        this.sunk = sunk;
     }
 
     @Override

@@ -44,6 +44,7 @@ new Vue({
           .then(response => {
               if(response.ok){
                   this.loggedIn=true;
+                    location.reload();
               } else {
               alert("Incorrect username or password");
               }
