@@ -1,6 +1,5 @@
 
 
-
 function buildLeaderBoard(scores){
 
      var table = document.getElementById("leaderBoard");

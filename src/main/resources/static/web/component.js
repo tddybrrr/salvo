@@ -6,7 +6,7 @@ export default {
     <div id="gridZone">
          <h1>{{name}}</h1>
              <h4 v-if="isNewGame"> Set up your new game below </h4>
-
+             <h3>selected gp: {{selected}}</h3>
              <select v-model="selected" v-on:change="makeGameView">
                   <option disabled value="">Please select one</option>
                   <option v-for="(item, index) in ids" :key="index"> {{item}}</option>
@@ -51,14 +51,15 @@ export default {
         </form>
 
         <form id="shotSelector" v-else>
-            <input id="shot" v-model="shot" placeholder="type where you shooting">
-              <button type="button" id="addShot" v-on:click="shots.push(shot)"> enter a shot </button>
-              <ul>
-                <li v-for="(item, index) in shots" :key="index"> {{ item }} </li>
-              </ul>
+
+              <ul id="list" >
+
+                </ul>
                <button type="button" id="addShot" v-on:click="shoot"> submit all shots</button>
-                    <h2> TURN: {{turn}} </h2>
+
         </form>
+
+
     </div>
 
 </div>
@@ -66,7 +67,7 @@ export default {
   data() {
     return {
       name: 'Choose a game',
-      selected: 1,
+      selected: null,
       /// GamePlayer ids for the currently loggedn player
       ids: [],
       shipType: null,
@@ -76,6 +77,7 @@ export default {
                {shipTypeName: "Destoryer", shipsLength: 4},
                {shipTypeName: "Aircraft Carrier", shipsLength: 5},
       ],
+      selectedShots: '',
       goingRight: null,
       shipPoint: null,
       isNewGame: null,
@@ -96,22 +98,22 @@ export default {
                 .then(gpData => {
             /// GamePlayer ids for the currently loggedn player
                    this.ids = gpData;
-                   this.selected =gpData[0];
+                   if (window.location.href.indexOf('gp=') == -1){
+                        this.selected = gpData[0];
+                        this.checkTurn();
+                        this.makeGameView();
+                   } else {
+                        var url = window.location.href;
+                        var gpNum = url.split('gp=').pop();
+                        this.selected=gpNum;
+//                        this.checkTurn();
+                        this.makeGameView();
+                }
                 }).catch(function(error) {
                   // called when an error occurs anywhere in the chain
                   console.log(error);
                 });
-                 if (window.location.href.indexOf('gp=') == -1){
-                     this.makeGameView();
-                     this.checkTurn();
-                } else {
-                    var url = window.location.href;
-                    var gpNum = url.split('gp=').pop();
-                    this.selected=gpNum;
-                    this.makeGameView();
-                     this.checkTurn();
 
-                }
   },
   methods:{
     checkTurn: function(){
@@ -126,40 +128,66 @@ export default {
               })
               .then(response => response.json())
               .then(data => {
-                console.log(data.turns)
                 this.turn = data.turns.length;
             })
                 .catch(err => console.log(err))
     },
     checkSunk: function(someInfo){
             var theirShips = someInfo.opponentInformation[0].enemyShips;
-//            console.log(theirShips);
             // each ship
             for (let i = 0; i<theirShips.length; i++){
                 var hits = 0;
-                // the locations of each ship's square
-                 for (let x = 0; x<theirShips[i].location.length; x++){
-                    // loop through every single turn
-                    for (let h = 0; h<someInfo.game_player[0].salvoes.length; h++){
-                        // loop though
-                        for (let y = 0; y<someInfo.game_player[0].salvoes[h].location.length; y++){
-                           if (theirShips[i].location[x] == someInfo.game_player[0].salvoes[h].location[y]){
-                             hits++;
-                             if (hits == theirShips[i].location.length){
-                                console.log("sunken Ship: " + theirShips[i].type);
+                // if the current ship in the loop is not already sunk
+                if (theirShips[i].sunk == false ) {
+                      // the locations of each ship's square
+                     for (let x = 0; x<theirShips[i].location.length; x++){
+                        // loop through every single turn
+                        for (let h = 0; h<someInfo.game_player[0].salvoes.length; h++){
+                            // loop though
+                            for (let y = 0; y<someInfo.game_player[0].salvoes[h].location.length; y++){
+                               if (theirShips[i].location[x] == someInfo.game_player[0].salvoes[h].location[y]){
+                                 hits++;
+                                 if (hits == theirShips[i].location.length){
+                                    console.log("sunken Ship: " + theirShips[i].shipID);
+                                    this.postSunk(theirShips[i].shipID);
+                                    }
                                 }
                             }
                         }
-                    }
+                     }
                  }
             }
-            console.log(someInfo.game_player[0].salvoes);
+    },
+    postSunk: function(id){
+
+                var theShipsId = id;
+                var selected = this.selected;
+               fetch('/api/games/players/' + selected + '/sinks', {
+                  credentials: 'include',
+                  method: 'POST',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  },
+                body: theShipsId
+              })
+              .then(response => response.json())
+              .then(data => {
+                alert("you sunk a " + data.sunkenShip + "!")
+            })
+                .catch(err => console.log(err))
     },
 
     shoot: function(){
-                var shots = this.shots
+//                var shots = this.shots;
+                var childNodes = document.getElementById('list').childNodes;
+                var newArrayOfShots = [];
+                 childNodes.forEach(elem => {
+                     newArrayOfShots.push(elem.innerHTML);
+                 });
+
                 var currentTurn = this.turn+1;
-                var anObject =  { "turn": currentTurn, "location": shots };
+                var anObject =  { "turn": currentTurn, "location": newArrayOfShots };
                 var selected = this.selected;
 
                fetch('/api/games/players/' + selected + '/salvoes', {
@@ -174,13 +202,14 @@ export default {
               .then(response => response.json())
               .then(data => {
 //                window.location.href="/web/testVue.html?gp=" + selected;
-                this.checkTurn();
                 location.reload();
             })
                 .catch(err => console.log(err))
     },
     makeGameView: function(){
-        fetch(("http://localhost:8080/api/gp_view/"+ this.selected), {
+        var theChosenOne = this.selected;
+        this.checkTurn();
+        fetch(("http://localhost:8080/api/gp_view/"+ theChosenOne), {
             method: "GET",
             headers: {
               'Accept': 'application/json',
@@ -189,7 +218,6 @@ export default {
             })
             .then(response => response.json())
             .then(gpData => {
-                console.log(gpData);
                 if (gpData.error === "FORBIDDEN"){
                      alert("not your game bro");
                 } else if (gpData.error === "Unauthorized"){
@@ -200,20 +228,20 @@ export default {
                     this.emptyGrid();
                     return;
                     }
-                 else {
+                else {
                     this.isNewGame=false;
                     this.name = gpData.game_player[0].realName + "'s View";
-                    this.build(gpData);
-                    this.checkSunk(gpData);
                      this.checkTurn();
-                 }
-
+                     this.checkSunk(gpData);
+                    this.build(gpData);
+                    this.someFunction();
+                }
             }).catch(function(error) {
               // called when an error occurs anywhere in the chain
               console.log(error);
             });
     },
-        addShip: function (start, ship, right){
+    addShip: function (start, ship, right){
 
         var start = this.shipPoint;
         var ship = this.shipType;
@@ -303,31 +331,18 @@ export default {
         myGrid.id="myGrid";
         daGrids.appendChild(myGrid);
 
-//        var whereIveShot = document.createElement("table");
-//        whereIveShot.classList.add("table", "table-dark",  "table-bordered")
-//        var whereIveShotTitle = document.createElement('caption');
-//        whereIveShotTitle.innerHTML = "Select shot placement";
-
-//        whereIveShot.id="whereIveShot";
-//        daGrids.appendChild(whereIveShot);
-
         var letters = ["", "a", "b", "c", "d", "e", "f", "g", "h"];
 
         for (var i=0; i< 9; i++){
             var rowMy = myGrid.insertRow(i);
-//            var rowShot = whereIveShot.insertRow(i);
 
             // first row of letters
             if (i==0){
                 for (var c=0; c<9; c++){
                     var cellMy = rowMy.insertCell(c);
-//                    var cellShot = rowShot.insertCell(c);
-
                     cellMy.innerHTML=letters[c];
                     cellMy.style.fontWeight="bold";
 
-//                    cellShot.innerHTML=letters[c];
-//                    cellShot.style.fontWeight="bold";
                 }
             // rest of the rows
             } else if (i>0) {
@@ -335,17 +350,11 @@ export default {
                 var cellMy = rowMy.insertCell(0);
                 cellMy.innerHTML=i;
                 cellMy.style.fontWeight="bold";
-
-//                var cellShot = rowShot.insertCell(0);
-//                cellShot.innerHTML=i;
-//                cellShot.style.fontWeight="bold";
-                // fill main grid with letter/number coordinates
                 for (var g=1; g<9; g++){
                     var cellMy = rowMy.insertCell(g);
                     cellMy.innerHTML="x"
                     cellMy.id=letters[g]+i;
-//                    var cellShot = rowShot.insertCell(g);
-//                    cellShot.innerHTML="x"
+
                 }
             }
         }
@@ -386,9 +395,16 @@ export default {
         daGrids.appendChild(myGrid);
 
 //         build score table
-
+        var centerDiv = document.createElement("div");
+        centerDiv.id="centerDiv";
+        daGrids.appendChild(centerDiv)
         var scoreTable = document.createElement("table");
-        daGrids.appendChild(scoreTable);
+        centerDiv.appendChild(scoreTable);
+
+        var theTurn = document.createElement('h2');
+        var theTurnText = this.turn;
+        theTurn.innerHTML="TURN: " + theTurnText;
+        centerDiv.appendChild(theTurn);
          var scoreBoardTitle = document.createElement('caption');
         scoreBoardTitle.innerHTML = "scoreboard";
         scoreTable.appendChild(scoreBoardTitle);
@@ -402,15 +418,17 @@ export default {
         cell.innerHTML="Ship Type";
          var cell = row.insertCell(1);
         cell.colSpan="4";
-        cell.innerHTML="HP";
+        cell.innerHTML="status";
 
         for (let s = 0; s<data.opponentInformation[0].enemyShips.length; s++){
-             let row = scoreTable.insertRow(i);
-               for (let g = 0; g<2; g++){
-                    let cell = row.insertCell(g);
-                    cell.colSpan="4";
-                    cell.innerHTML=data.opponentInformation[0].enemyShips[s].type;
-            }
+             // make a row for each ship
+            let row = scoreTable.insertRow(i);
+            var cell = row.insertCell(0);
+            cell.colSpan="4";
+            cell.innerHTML=data.opponentInformation[0].enemyShips[s].type;
+            cell = row.insertCell(1);
+            cell.colSpan="4";
+            cell.innerHTML=data.opponentInformation[0].enemyShips[s].sunk;
         }
 
          // build grid of my sots against my opponent
@@ -491,22 +509,37 @@ export default {
                 }
             }
         }
+
         myGrid.appendChild(myGridTitle);
         whereIveShot.appendChild(whereIveShotTitle);
-          var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
+
+    },
+    someFunction: function(){
+                var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
                 return eachCell.id !== '';
           });
 //          console.log(allCells);
         for (var i = 0; i < allCells.length; i++) {
+            var myValue;
             allCells[i].addEventListener('click', function() {
                 var targetCell =  document.getElementById(this.id);
                 var targetPic = new Image();
                 targetPic.src = 'https://a.wattpad.com/useravatar/target.256.882874.jpg';
                 targetPic.style.display = "block";
                 targetPic.style.width="100%";
-                targetCell.appendChild(targetPic);
-//                console.log(this.id);
+                 targetCell.appendChild(targetPic);
+                 var list = document.getElementById('list');
+                 var listLength = list.childElementCount+1;
+                 if (listLength>=3){
+                    list.style.border = "thick solid #0000FF";
+                    alert("confirm Shots?")
+                 }
+                 var item = document.createElement('li');
+                 item.innerHTML=this.id;
+                 list.appendChild(item);
+//                console.log(cellId);
             });
+
         }
     }
   }

@@ -120,6 +120,7 @@ public class SalvoController {
         currentPlayer.getGamePlayers().stream().forEach(gamePlayer -> {
             list.add(gamePlayer.getId());
         });
+        list.sort(null);
             return list;
     }
 
@@ -292,7 +293,7 @@ public class SalvoController {
             shipsMap.put("ShipID", ship.getId());
             shipsMap.put("ShipLocation", ship.getlocation());
             shipsMap.put("ShipType", ship.getShipType());
-            shipsMap.put("sunk?", ship.isSunk());
+            shipsMap.put("sunk", ship.isSunk());
             shipObject.add(shipsMap);
         });
         Map<String, Object> finalShipMap = new HashMap<>();
@@ -300,14 +301,12 @@ public class SalvoController {
         return finalShipMap;
     }
 
-
     @RequestMapping(path = "/games/players/{gamePlayerId}/ships", method=RequestMethod.POST)
      public ResponseEntity<Map<String, Object>> addShips(@PathVariable long gamePlayerId,
                                                           Authentication authentication,
                                                           @RequestBody Ship sentShip) {
         // there is no current user logged in, or
-
-         GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
+        GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
         Player loggedInPlayer = playersRepo.findUserByUserName(authentication.getName());
         if (getAuthenticatedPlayer(authentication).getuserName()== null){
             return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
@@ -368,13 +367,14 @@ public class SalvoController {
             Map<String, Object> ships = new HashMap<>();
             ships.put("location", ship.getlocation());
             ships.put("type", ship.getShipType());
-            ships.put("sunk?", ship.isSunk());
+            ships.put("sunk", ship.isSunk());
+            ships.put("shipID", ship.getId());
+
             shipsObj.add(ships);
         });
         return shipsObj;
     }
     public List<Object> getOpponentInfo (GamePlayer you){
-
         List<Object> opponentObj = new ArrayList<>();
         you.getGame().getGamePlayers().stream().forEach(dude -> {
             if (dude.getId() != you.getId()){
@@ -396,5 +396,31 @@ public class SalvoController {
             salvoesObj.add(ships);
         });
         return salvoesObj;
+    }
+
+    @RequestMapping(path = "/games/players/{gamePlayerId}/sinks", method=RequestMethod.POST)
+     public ResponseEntity<Map<String, Object>> updateDinks(@PathVariable long gamePlayerId,
+                                                          Authentication authentication,
+                                                          @RequestBody Long theShipID) {
+        // there is no current user logged in, or
+        GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
+        Player loggedInPlayer = playersRepo.findUserByUserName(authentication.getName());
+        if (getAuthenticatedPlayer(authentication).getuserName()== null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "you are not logged in"), HttpStatus.UNAUTHORIZED);
+            //there is no game player with the given ID, or
+        } else if (gamePlayerRepo.findOne(gamePlayerId) == null){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "no such game player"), HttpStatus.UNAUTHORIZED);
+
+        //the current user is not the game player the ID references
+        }  else if (!loggedInPlayer.getGamePlayers().contains(currentGP)){
+            return new ResponseEntity<>(makeMapForResponseEntity("error", "not your game"), HttpStatus.UNAUTHORIZED);
+        }
+        //add ships
+         else {
+             Ship currentShip = shipsRepo.findOne(theShipID);
+             currentShip.setSunk(true);
+             shipsRepo.save(currentShip);
+            return new ResponseEntity<>(makeMapForResponseEntity("sunkenShip", currentShip.getShipType()), HttpStatus.CREATED);
+        }
     }
 }

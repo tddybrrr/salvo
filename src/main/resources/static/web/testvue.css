@@ -2,14 +2,14 @@
 
 td, tr, th {
     border: solid 1px black;
-    width: 1em;
-    height: 1em;
+    width: 1.5em;
+    height: 1.5em;
 }
 
 #daGrids {
-display: flex;
-flex-direction: row;
-justify-content: space-around;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
 }
 .table {
     border: solid 1em grey;
@@ -19,4 +19,20 @@ justify-content: space-around;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+}
+#centerDiv{
+     display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    text-align: center;
+}
+
+#centerDiv > table {
+     border: solid 1em orange;
+
+}
+
+caption {
+    font-weight: bold;
+    font-size: 1.5em;
 }
