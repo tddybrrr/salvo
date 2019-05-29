@@ -79,7 +79,6 @@ new Vue({
                     alert(response.error);
               } else {
                   this.testLogin();
-//                    alert("account created: " + Object.values(response)[0]);
               }
           })
           .catch(err => alert(err))
