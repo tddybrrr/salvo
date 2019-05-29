@@ -36,3 +36,43 @@ caption {
     font-weight: bold;
     font-size: 1.5em;
 }
+
+.woo:hover{
+     background-image: url("https://a.wattpad.com/useravatar/target.256.882874.jpg");
+      background-size: contain;
+      opacity : 0.2;
+}
+
+#list {
+
+  list-style-type: none;
+    padding-left: 20px;
+    padding-top: 5px;
+}
+
+#list li{
+    color: red;
+    font-size: 25px;
+    font-weight: bold;
+}
+#list li:before {
+
+  content: '';
+
+  display: inline-block;
+
+  height: 25px;
+
+  width: 25px;
+
+   background-size: 25px;
+
+    transform: rotate(20deg);
+
+  background-image: url("https://estesrockets.com/wp-content/uploads/2018/11/005302_main.jpg");
+
+  background-repeat: no-repeat;
+
+  margin-right: 5px;
+
+}

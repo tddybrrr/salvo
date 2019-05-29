@@ -49,19 +49,13 @@ export default {
                 <button type="button" id="addShipBtn" v-on:click="addShip"> Add ship</button>
             </div>
         </form>
+        <div id="shotSelector" v-else>
+              <ul id="list">
+               </ul>
 
-        <form id="shotSelector" v-else>
-
-              <ul id="list" >
-
-                </ul>
-               <button type="button" id="addShot" v-on:click="shoot"> submit all shots</button>
-
-        </form>
-
-
+               <button type="button" id="addShot" v-on:click="shoot"> Confirm Shots?</button>
+        </div>
     </div>
-
 </div>
   `,
   data() {
@@ -354,7 +348,6 @@ export default {
                     var cellMy = rowMy.insertCell(g);
                     cellMy.innerHTML="x"
                     cellMy.id=letters[g]+i;
-
                 }
             }
         }
@@ -364,7 +357,6 @@ export default {
 
         for (var i = 0; i < allCells.length; i++) {
             allCells[i].addEventListener('click', function() {
-
                 console.log(this.id);
             });
         }
@@ -390,7 +382,7 @@ export default {
         var myGrid = document.createElement("table");
         myGrid.classList.add("table", "table-bordered");
         var myGridTitle = document.createElement('caption');
-        myGridTitle.innerHTML = "my grid";
+        myGridTitle.innerHTML = "My Boats";
         myGrid.id="myGrid";
         daGrids.appendChild(myGrid);
 
@@ -435,7 +427,7 @@ export default {
         var whereIveShot = document.createElement("table");
         whereIveShot.classList.add("table", "table-dark",  "table-bordered")
         var whereIveShotTitle = document.createElement('caption');
-        whereIveShotTitle.innerHTML = "Where I have shot";
+        whereIveShotTitle.innerHTML = "Shot History";
 
         whereIveShot.id="whereIveShot";
         daGrids.appendChild(whereIveShot);
@@ -496,6 +488,7 @@ export default {
                              for (let b=0; b<data.game_player[0].salvoes.length; b++){
                                 for (let h=0; h < data.game_player[0].salvoes[b].location.length; h++){
                                     cellShot.id=letters[g]+i;
+                                    cellShot.classList.add('woo');
                                     if (data.game_player[0].salvoes[b].location[h] == letters[g]+i){
                                     cellShot.innerHTML = "x" + data.game_player[0].salvoes[b].turn;
                                         if (data.opponentInformation[0].enemyShips[p].location[x] == data.game_player[0].salvoes[b].location[h]){
@@ -522,21 +515,34 @@ export default {
         for (var i = 0; i < allCells.length; i++) {
             var myValue;
             allCells[i].addEventListener('click', function() {
-                var targetCell =  document.getElementById(this.id);
-                var targetPic = new Image();
-                targetPic.src = 'https://a.wattpad.com/useravatar/target.256.882874.jpg';
-                targetPic.style.display = "block";
-                targetPic.style.width="100%";
-                 targetCell.appendChild(targetPic);
+
                  var list = document.getElementById('list');
                  var listLength = list.childElementCount+1;
-                 if (listLength>=3){
-                    list.style.border = "thick solid #0000FF";
-                    alert("confirm Shots?")
+
+                 if (listLength <= 3 ){
+                        var targetCell =  document.getElementById(this.id);
+                        var targetPic = new Image();
+                        targetPic.src = 'https://a.wattpad.com/useravatar/target.256.882874.jpg';
+                        targetPic.style.display = "block";
+                        targetPic.style.width="100%";
+                         targetCell.appendChild(targetPic);
+                        var item = document.createElement('li');
+                         item.innerHTML=this.id;
+                         list.appendChild(item);
+                 } else if (listLength==3) {
+                        var targetCell =  document.getElementById(this.id);
+                        var targetPic = new Image();
+                        targetPic.src = 'https://a.wattpad.com/useravatar/target.256.882874.jpg';
+                        targetPic.style.display = "block";
+                        targetPic.style.width="100%";
+                         targetCell.appendChild(targetPic);
+                        var item = document.createElement('li');
+                         item.innerHTML=this.id;
+                         list.appendChild(item);
+                        list.style.border = "thick solid #0000FF";
+                 }  else {
+                      alert("too many shots!");
                  }
-                 var item = document.createElement('li');
-                 item.innerHTML=this.id;
-                 list.appendChild(item);
 //                console.log(cellId);
             });
 

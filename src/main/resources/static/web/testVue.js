@@ -4,7 +4,10 @@ import SingleFileComponent from './component.js';
 new Vue({
   el: '#app',
   data: {
-    loggedIn: false
+    loggedIn: false,
+    un: '',
+    pw: '',
+    credentials: ''
   },
   components: {
     SingleFileComponent
@@ -29,9 +32,14 @@ new Vue({
           .catch(err => console.log(err))
   },
   methods: {
+    createCredentials: function(){
+        let loginCredentials = 'userName=' + this.un + '&password=' + this.pw;
+        this.credentials = loginCredentials;
+    },
 
     testLogin: function(){
-      let form = document.getElementById('signInUp');
+      var loginCredentials = this.credentials;
+
       fetch('/api/login', {
               credentials: 'include',
               method: 'POST',
@@ -39,7 +47,8 @@ new Vue({
                   'Accept': 'application/json',
                   'Content-Type': 'application/x-www-form-urlencoded'
               },
-              body: 'userName=' + form[0].value + '&password=' + form[1].value
+            body: loginCredentials
+//              body: 'userName=' + form[0].value + '&password=' + form[1].value
           })
           .then(response => {
               if(response.ok){
@@ -52,7 +61,8 @@ new Vue({
           .catch(err => console.log(err))
     },
     testSignup: function(){
-        let form = document.getElementById('signInUp');
+      var loginCredentials = this.credentials;
+
         fetch('/api/players', {
               credentials: 'include',
               method: 'POST',
@@ -60,7 +70,7 @@ new Vue({
                   'Accept': 'application/json',
                   'Content-Type': 'application/x-www-form-urlencoded'
               },
-              body: 'userName=' + form[0].value + '&password=' + form[1].value
+              body: loginCredentials
           })
           .then(response => response.json())
           .then(response => {
@@ -68,8 +78,8 @@ new Vue({
               if (Object.keys(response)[0] == "error"){
                     alert(response.error);
               } else {
-//                  this.testLogin();
-                    alert("account created: " + Object.values(response)[0]);
+                  this.testLogin();
+//                    alert("account created: " + Object.values(response)[0]);
               }
           })
           .catch(err => alert(err))
