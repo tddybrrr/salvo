@@ -144,8 +144,6 @@ function joinGame(gameID){
                alert("no such game");
             } else if (data.error === "you are not logged in"){
                 alert("you are not logged in");
-            } else {
-                alert("success?");
             }
         })
         .catch(err => console.log(err))
