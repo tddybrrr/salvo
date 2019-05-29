@@ -28,6 +28,9 @@ public class SalvoController {
      @Autowired
     private SalvoRepository salvoeRepo;
 
+     @Autowired
+     private ScoreRepository scoreRepo;
+
     private boolean isGuest(Authentication authentication) {
         return authentication == null || authentication instanceof AnonymousAuthenticationToken;
     }
@@ -325,9 +328,7 @@ public class SalvoController {
              Map<Object,Object> results = new HashMap<>();
               currentGP.addShip(sentShip);
              shipsRepo.save(sentShip);
-
              results.put(sentShip.getId(), sentShip.getlocation());
-
             return new ResponseEntity<>(makeMapForResponseEntity("addedShips", results), HttpStatus.CREATED);
         }
     }
@@ -422,5 +423,19 @@ public class SalvoController {
              shipsRepo.save(currentShip);
             return new ResponseEntity<>(makeMapForResponseEntity("sunkenShip", currentShip.getShipType()), HttpStatus.CREATED);
         }
+    }
+
+    // update player scores
+       @RequestMapping(path = "/games/players/{gamePlayerId}/scores", method=RequestMethod.POST)
+     public ResponseEntity<Map<String, Object>> postScores(@PathVariable long gamePlayerId,
+                                                          Authentication authentication,
+                                                          @RequestBody Double theScore) {
+        GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
+        Game currentGame = currentGP.getGame();
+        Player loggedInPlayer = playersRepo.findUserByUserName(authentication.getName());
+
+        Score newScore = new Score(loggedInPlayer, currentGame, theScore );
+        scoreRepo.save(newScore);
+        return new ResponseEntity<>(makeMapForResponseEntity("sunkenShip", loggedInPlayer.getScore()), HttpStatus.CREATED);
     }
 }
