@@ -20,34 +20,29 @@ export default {
     <br>
     <div id=selectors>
          <form id="shipSelector" v-if="isNewGame">
-            <div class="form-group row">
-                <label for="shipTypeSelector" class="col-sm-6 col-form-label">ship type:
+                <label for="shipTypeSelector" >ship type:
                 </label>
-                <div class="col-sm-6">
-                    <select v-model="shipType" id="shipTypeSelector" name="shipTypeSelector">
-                        <option v-for="(item, index) in shipList" :key="index" :value="item.shipsLength"> {{item.shipTypeName}} ({{item.shipsLength}}) </option>
-                    </select>
-                </div>
-            </div>
-            <br>
-            <div class="form-group row">
-                <label class="col-sm-6 col-form-label">ship direction:
-                </label>
-                <div class="col-sm-6">
-                    <input type="checkbox" id="goingRight" v-model="goingRight">
-                        <label for="goingRight">Is the ship going right? {{ goingRight }}</label>
-                </div>
-            </div>
-               <br>
-            <div class="form-group row">
-                <div class="col-sm-6">
-                    <input v-model="shipPoint" placeholder="starting point">
-                </div>
-            </div>
-               <br>
-            <div class="form-row">
+                <select v-model="shipType" id="shipTypeSelector" name="shipTypeSelector">
+                    <option v-for="(item, index) in shipList" :key="index" :value="item.shipsLength"> {{item.shipTypeName}} ({{item.shipsLength}}) </option>
+                </select>
+
+                <fieldset id="directions">
+                     <legend >ship direction:
+                    </legend>
+                    <input type="radio" id="Right" value="Right" v-model="picked">
+                    <label for="Right">Right</label>
+                    <br>
+                    <input type="radio" id="Down" value="Down" v-model="picked">
+                    <label for="Down">Down</label>
+                </fieldset>
+                <fieldset>
+                   <legend >starting point
+                    </legend>
+                    <input id="shipPoint" v-model="shipPoint" placeholder="(click cell on grid)">
+                </fieldset>
+                <br>
                 <button type="button" id="addShipBtn" v-on:click="addShip"> Add ship</button>
-            </div>
+
         </form>
         <div id="shotSelector" v-else>
               <ul id="list">
@@ -64,7 +59,7 @@ export default {
       selected: null,
       /// GamePlayer ids for the currently loggedn player
       ids: [],
-      shipType: null,
+      shipType: 2,
       shipList: [
                {shipTypeName: "Helicopter", shipsLength: 2},
                {shipTypeName: "Submarine", shipsLength: 3},
@@ -72,12 +67,14 @@ export default {
                {shipTypeName: "Aircraft Carrier", shipsLength: 5},
       ],
       selectedShots: '',
+      picked: 'Right',
       goingRight: null,
       shipPoint: null,
       isNewGame: null,
       shot: null,
       shots: [],
-      turn: null
+      turn: null,
+      coordinates: []
     }
   },
   created(){
@@ -256,9 +253,19 @@ export default {
               console.log(error);
             });
     },
-    addShip: function (start, ship, right){
 
-        var start = this.shipPoint;
+    createNewCoordinates: function(start){
+//        var start = this.shipPoint;
+
+//            newArr.forEach(letter => {
+//                let cell = document.getElementById(letter);
+//                cell.style.backgroundColor = "red";
+//            })
+
+    },
+
+    addShip: function (){
+//        var start = this.shipPoint;
         var ship = this.shipType;
         var shipTypeText = '';
         if (ship == 2){
@@ -270,39 +277,7 @@ export default {
         } else if (ship == 5){
             shipTypeText = "Aircraft Carrier"
         }
-        var right = this.goingRight;
-          try {
-            if(right == null) throw "select a direction";
-            if(start == null) throw "select a starting point";
-            if(ship == null) throw "select a ship";
-          }
-          catch(err) {
-        alert("error: " + err);
-        return;
-        }
-        var newArr= [];
-          var letters=["a", "b", "c", "d", "e", "f", "g", "h"];
-            if (right === false){
-              var startingNum = start.charAt(1);
-              for (let i=0; i<ship; i++){
-                if (startingNum > 8){
-                  return start.charAt(0) + startingNum  + " is out of range";
-                }
-                newArr.push(start.charAt(0)+startingNum);
-                startingNum++;
-              }
-            } else {
-              var startingIndex = letters.indexOf(start.charAt(0));
-              for (let i=0; i<ship; i++){
-                 if ((letters[startingIndex]) === undefined){
-                  return "ship selection is out of range";
-                }
-                newArr.push(letters[startingIndex] + start.charAt(1));
-                startingIndex++;
-              }
-            }
-            var anObject =  { "shipType": shipTypeText, "location": newArr };
-//            var gamePlayerId = 1;
+        var anObject =  { "shipType": shipTypeText, "location": this.coordinates };
             fetch('/api/games/players/' + this.selected + '/ships', {
                   credentials: 'include',
                   method: 'POST',
@@ -338,7 +313,7 @@ export default {
         gridZone.appendChild(daGrids);
 
         var myGrid = document.createElement("table");
-        myGrid.classList.add("table", "table-bordered");
+        myGrid.classList.add("table");
         var myGridTitle = document.createElement('caption');
         myGridTitle.innerHTML = "Select ship placement";
 
@@ -366,6 +341,8 @@ export default {
                     var cellMy = rowMy.insertCell(g);
 //                    cellMy.innerHTML="x"
                     cellMy.id=letters[g]+i;
+//                    cellMy.classList.add('hoverShip');
+                    cellMy.addEventListener("mouseover", this.idk);
                 }
             }
         }
@@ -378,6 +355,57 @@ export default {
                 console.log(this.id);
             });
         }
+    },
+    idk: function(event){
+         var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
+                return eachCell.id !== '';
+          });
+        allCells.forEach(cell => {
+            cell.classList.remove('hoverShip')
+        });
+
+
+        var right = this.picked;
+        var ship = this.shipType;
+        var shipTypeText;
+        var start = event.path[0].id;
+        if (ship == 2){
+            shipTypeText = "Helicopter"
+        } else if (ship == 3){
+            shipTypeText = "Submarine"
+        } else if (ship == 4){
+            shipTypeText = "Destroyer"
+        } else if (ship == 5){
+            shipTypeText = "Aircraft Carrier"
+        }
+        var newArr= [];
+        var letters=["a", "b", "c", "d", "e", "f", "g", "h"];
+            if (right === 'Down'){
+              var startingNum = start.charAt(1);
+              for (let i=0; i<ship; i++){
+                if (startingNum > 8){
+                  return start.charAt(0) + startingNum  + " is out of range";
+                }
+                newArr.push(start.charAt(0)+startingNum);
+                startingNum++;
+              }
+            } else if (right === 'Right') {
+              var startingIndex = letters.indexOf(start.charAt(0));
+              for (let i=0; i<ship; i++){
+                 if ((letters[startingIndex]) === undefined){
+                  return "ship selection is out of range";
+                }
+                newArr.push(letters[startingIndex] + start.charAt(1));
+                startingIndex++;
+              }
+            }
+            this.coordinates=newArr;
+            console.log(newArr);
+                newArr.forEach(letter => {
+                let cell = document.getElementById(letter);
+
+                cell.classList.add('hoverShip')
+            })
     },
     build: function(data){
 
@@ -530,13 +558,11 @@ export default {
                 }
             }
         }
-
         myGrid.appendChild(myGridTitle);
         whereIveShot.appendChild(whereIveShotTitle);
-
     },
     someFunction: function(){
-                var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
+         var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
                 return eachCell.id !== '';
           });
 //          console.log(allCells);
