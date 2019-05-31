@@ -1,4 +1,9 @@
-
+#app{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 110vh;
+}
 
 td, tr, th {
     border: solid 1px black;
@@ -7,7 +12,29 @@ td, tr, th {
     text-align: center;
 }
 
-#daGrids {
+#signInUp{
+    width: max-content;
+    margin: auto;
+    padding: 2em;
+    height: 200px;
+    border: solid 1px black;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+#logOutButton{
+    width: max-content;
+}
+
+#shipSelector{
+    height: 200px;
+      display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#daGrids, .buttons {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -18,7 +45,6 @@ td, tr, th {
 
 #selectors{
     display: flex;
-    flex-direction: row;
     justify-content: space-around;
 }
 #centerDiv{
@@ -44,6 +70,11 @@ caption {
 .hoverCell:hover{
      background-image: url("https://a.wattpad.com/useravatar/target.256.882874.jpg");
       background-size: contain;
+      opacity : 0.2;
+}
+
+.hoverShip{
+       background-color: red;
       opacity : 0.2;
 }
 

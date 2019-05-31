@@ -10,30 +10,21 @@
 
    <div id="app">
        <a href="/web/games.html">Public Leaderboards</a>
-        <br>
-        <form v-if="loggedIn == false" class="form-group w-50 p-3" id="signInUp" name="signInUp">
-            <div class="row">
-                <div class="col"> Enter Username:
-                    <input class="form-control" v-model="un" type="text" id="username" v-on:input="createCredentials" name="userName">
+       <button v-if="loggedIn == true" id="logOutButton" v-on:click="testLogout"> Log Out</button>
+        <form v-if="loggedIn == false" id="signInUp" name="signInUp">
+                <div > Enter Username:
+                    <input  v-model="un" type="text" id="username" v-on:input="createCredentials" name="userName">
                 </div>
-                <div class="col"> Enter password:
-                    <input class="form-control"  v-model="pw" type="text" id="password" v-on:input="createCredentials" name="password">
+                <div > Enter password:
+                    <input   v-model="pw" type="text" id="password" v-on:input="createCredentials" name="password">
                 </div>
-            </div>
-            <br>
-            <div class="row">
-                <button id = "signinButton" type="button"  v-on:click="testLogin">Sign in</button>
-                <button id = "signupButton" type="button"  v-on:click="testSignup">Sign up</button>
-            </div>
+                <div class="buttons">
+                    <button id = "signinButton" type="button"  v-on:click="testLogin">Sign in</button>
+                    <button id = "signupButton" type="button"  v-on:click="testSignup">Sign up</button>
+                </div>
         </form>
-
         <div v-if="loggedIn == true" id="userInterface">
-
-            <button id="logOutButton" v-on:click="testLogout"> Log Out</button>
-
              <single-file-component></single-file-component>
-
-
         </div>
    </div>
 
