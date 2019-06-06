@@ -12,14 +12,14 @@ export default {
                   <option v-for="(item, index) in ids" :key="index"> {{item}}</option>
             </select>
                <br>
-                <hr>
-                <br>
+               <hr>
+               <br>
     </div>
     <br>
     <hr>
     <br>
     <div id=selectors>
-         <form id="shipSelector" v-if="isNewGame">
+         <form id="shipSelector" v-if="isNewGame == true">
                 <label for="shipTypeSelector" >ship type:
                 </label>
                 <select v-model="shipType" id="shipTypeSelector" name="shipTypeSelector">
@@ -35,20 +35,21 @@ export default {
                     <input type="radio" id="Down" value="Down" v-model="picked">
                     <label for="Down">Down</label>
                 </fieldset>
-                <fieldset>
-                   <legend >starting point
-                    </legend>
-                    <input id="shipPoint" v-model="shipPoint" placeholder="(click cell on grid)">
-                </fieldset>
+
                 <br>
-                <button type="button" id="addShipBtn" v-on:click="addShip"> Add ship</button>
-
+              <button type="button" id="confirm" v-on:click="confirm"> confirm ships </button>
         </form>
-        <div id="shotSelector" v-else>
-              <ul id="list">
+        <div id="shotSelector" v-else-if="isNewGame == false">
+            <h1 v-if="yourTurn">waiting on opponent to shoot </h1>
+            <div v-else>
+               <ul id="list">
                </ul>
-
                <button type="button" id="addShot" v-on:click="shoot"> Confirm Shots</button>
+            </div>
+
+        </div>
+          <div v-else-if="isNewGame == null">
+             <h1> Waiting on other player to place their ships </h1>
         </div>
     </div>
 </div>
@@ -68,12 +69,11 @@ export default {
       ],
       selectedShots: '',
       picked: 'Right',
-      goingRight: null,
-      shipPoint: null,
-      isNewGame: null,
+      isNewGame: true,
       shot: null,
       shots: [],
       turn: null,
+      yourTurn: null,
       coordinates: []
     }
   },
@@ -90,9 +90,7 @@ export default {
             /// GamePlayer ids for the currently loggedn player
                     if (gpData.length == 0 ){
                         window.location.href = "games.html";
-
                     }
-                    console.log(gpData.length);
                    this.ids = gpData;
                    if (window.location.href.indexOf('gp=') == -1){
                         this.selected = gpData[0];
@@ -102,16 +100,18 @@ export default {
                         var url = window.location.href;
                         var gpNum = url.split('gp=').pop();
                         this.selected=gpNum;
-//                        this.checkTurn();
                         this.makeGameView();
                 }
                 }).catch(function(error) {
                   // called when an error occurs anywhere in the chain
                   console.log(error);
                 });
-
   },
   methods:{
+
+    deleteItem: function(index){
+            this.$delete(this.items,index);
+    },
     gameOver: function(){
         alert("GAME OVER !!!!!!");
         var selected = this.selected;
@@ -142,8 +142,13 @@ export default {
               })
               .then(response => response.json())
               .then(data => {
-                this.turn = data.turns.length;
-            })
+                if (data.myTurns.length !== data.theirTurns.length){
+                    this.yourTurn=true;
+                } else {
+                    this.yourTurn=false;
+                }
+                this.turn = data.myTurns.length;
+                 })
                 .catch(err => console.log(err))
     },
     checkSunk: function(someInfo){
@@ -186,6 +191,7 @@ export default {
               .then(response => response.json())
               .then(data => {
                 alert("you sunk a " + data.sunkenShip + "!")
+                location.reload();
             })
                 .catch(err => console.log(err))
     },
@@ -213,8 +219,8 @@ export default {
               })
               .then(response => response.json())
               .then(data => {
-//                window.location.href="/web/testVue.html?gp=" + selected;
-                location.reload();
+                window.location.href="/web/testVue.html?gp=" + selected;
+//                location.reload();
             })
                 .catch(err => console.log(err))
     },
@@ -235,9 +241,14 @@ export default {
                 } else if (gpData.error === "Unauthorized"){
                     alert("not logged in");
                 }
-                else if (gpData.game_player[0].ships.length == 0 || gpData.opponentInformation.length == 0 ){
+                else if (gpData.game_player[0].ships.length == 0 ){
                     this.isNewGame=true;
                     this.emptyGrid();
+                    return;
+                    }
+                else if (gpData.opponentInformation.length == 0){
+                    this.isNewGame=null;
+
                     return;
                     }
                 else {
@@ -254,18 +265,11 @@ export default {
             });
     },
 
-    createNewCoordinates: function(start){
-//        var start = this.shipPoint;
-
-//            newArr.forEach(letter => {
-//                let cell = document.getElementById(letter);
-//                cell.style.backgroundColor = "red";
-//            })
-
+    confirm: function(){
+             location.reload();
     },
 
     addShip: function (){
-//        var start = this.shipPoint;
         var ship = this.shipType;
         var shipTypeText = '';
         if (ship == 2){
@@ -291,7 +295,6 @@ export default {
               .then(response => response.json())
               .then(function(data) {
                 console.log(data);
-//                location.reload();
             })
                 .catch(err => console.log(err))
     },
@@ -299,7 +302,6 @@ export default {
     emptyGrid: function(){
 
         var gridZone = document.getElementById('gridZone');
-
         var daGrids = document.getElementById('daGrids');
 
         // deletes innerHTML if a grid was built before
@@ -309,7 +311,6 @@ export default {
             var daGrids = document.createElement('div');
                 daGrids.id="daGrids";
         }
-
         gridZone.appendChild(daGrids);
 
         var myGrid = document.createElement("table");
@@ -342,7 +343,7 @@ export default {
 //                    cellMy.innerHTML="x"
                     cellMy.id=letters[g]+i;
 //                    cellMy.classList.add('hoverShip');
-                    cellMy.addEventListener("mouseover", this.idk);
+                    cellMy.addEventListener("mouseover", this.hoverClassAdder);
                 }
             }
         }
@@ -351,19 +352,25 @@ export default {
         var allCells = document.getElementsByTagName("td");
 
         for (var i = 0; i < allCells.length; i++) {
-            allCells[i].addEventListener('click', function() {
+            var self = this;
+            allCells[i].addEventListener('click', function(e) {
                 console.log(this.id);
+                self.addShip(this.id)
+                var someCells = Array.from(document.getElementsByClassName("hoverShip")).forEach(cell => {
+                    cell.classList.remove('hoverShip');
+                    cell.classList.add('placedShip');
+
+                 });
             });
         }
     },
-    idk: function(event){
+    hoverClassAdder: function(event){
          var allCells = Array.from(document.getElementsByTagName("td")).filter(eachCell => {
                 return eachCell.id !== '';
           });
         allCells.forEach(cell => {
             cell.classList.remove('hoverShip')
         });
-
 
         var right = this.picked;
         var ship = this.shipType;
@@ -399,11 +406,10 @@ export default {
                 startingIndex++;
               }
             }
-            this.coordinates=newArr;
-            console.log(newArr);
-                newArr.forEach(letter => {
-                let cell = document.getElementById(letter);
 
+            this.coordinates=newArr;
+            newArr.forEach(letter => {
+                let cell = document.getElementById(letter);
                 cell.classList.add('hoverShip')
             })
     },

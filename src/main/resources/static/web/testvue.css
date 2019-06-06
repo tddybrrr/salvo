@@ -74,8 +74,11 @@ caption {
 }
 
 .hoverShip{
-       background-color: red;
+      background-color: blue;
       opacity : 0.2;
+}
+.placedShip{
+    background-color: blue;
 }
 
 #list {
@@ -99,9 +102,9 @@ caption {
 
   width: 25px;
 
-   background-size: 25px;
+  background-size: 25px;
 
-    transform: rotate(20deg);
+  transform: rotate(20deg);
 
   background-image: url("https://estesrockets.com/wp-content/uploads/2018/11/005302_main.jpg");
 

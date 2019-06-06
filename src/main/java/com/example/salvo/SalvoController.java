@@ -267,22 +267,47 @@ public class SalvoController {
         return gamePlayersMap;
     }
 
+
+
      @RequestMapping(path = "/games/players/{gamePlayerId}/salvoes")
      public Map<String, Object> getSalvoes(@PathVariable long gamePlayerId, Authentication auth) {
 
         if (getAuthenticatedPlayer(auth).getuserName() == gamePlayerRepo.getOne(gamePlayerId).getPlayer().getuserName()) {
             GamePlayer aGamePlayer = gamePlayerRepo.findOne(gamePlayerId);
-            List<Object> salvoeObject = new ArrayList<>();
+            Game currentGame = gamePlayerRepo.findById(aGamePlayer.getId()).getGame();
 
-            aGamePlayer.salvoes.stream().forEach(turn -> {
+            Set<GamePlayer> set = new HashSet<>(currentGame.getGamePlayers());
+
+            Set<GamePlayer> filteredSet = new HashSet<>();
+
+		// iterate through the set
+            for (GamePlayer g : set) {
+                // filter languages that start with C
+                if (g.getId() == aGamePlayer.getId()) {
+                } else {
+                    filteredSet.add(g);
+                }
+            }
+            GamePlayer Opponent = filteredSet.iterator().next();
+
+            List<Object> myObject = new ArrayList<>();
+            List<Object> opponentObject = new ArrayList<>();
+
+            Opponent.salvoes.stream().forEach(turn -> {
                 Map<String, Object> salvoesMap = new HashMap<>();
-
                 salvoesMap.put("shotLocations", turn.getLocations());
                 salvoesMap.put("turn", turn.getTurn());
-                salvoeObject.add(salvoesMap);
+                opponentObject.add(salvoesMap);
+            });
+            aGamePlayer.salvoes.stream().forEach(turn -> {
+                Map<String, Object> salvoesMap = new HashMap<>();
+                salvoesMap.put("shotLocations", turn.getLocations());
+                salvoesMap.put("turn", turn.getTurn());
+                myObject.add(salvoesMap);
             });
               Map<String, Object> finalSalvoeMap = new HashMap<>();
-                finalSalvoeMap.put("turns", salvoeObject);
+                finalSalvoeMap.put("myTurns", myObject);
+                finalSalvoeMap.put("theirTurns", opponentObject);
                 return finalSalvoeMap;
         }
         return makeMapForResponseEntity("error", HttpStatus.FORBIDDEN);
