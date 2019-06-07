@@ -159,8 +159,7 @@ fetch( "http://localhost:8080/api/games",{
     // signal a server error to the chain
     throw new Error(response.statusText);
     }).then(function(json) {
-        //    console.log(json.scores)
-        //    console.log(json.games)
+        console.log(json);
         buildLeaderBoard(json.scores)
         buildOverview(json.games)
     }).catch(function(error) {

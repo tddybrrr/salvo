@@ -17,7 +17,6 @@ public class Score {
     private Double scoreValue;
     private Date finishDate;
 
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="player_id")
     private Player player;

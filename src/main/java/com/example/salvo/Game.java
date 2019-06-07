@@ -28,6 +28,8 @@ public class Game {
     @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
     Set<Score> scores = new HashSet<>();
 
+//    @OneToMany(mappedBy="game", fetch=FetchType.EAGER)
+    private Boolean isFinished = false;
 
     private LocalDateTime gameTime =  LocalDateTime.now();
 
@@ -66,6 +68,14 @@ public class Game {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Boolean getFinished() {
+        return isFinished;
+    }
+
+    public void isFinished(Boolean isFinished) {
+        this.isFinished = isFinished;
     }
 
     boolean isFull(){

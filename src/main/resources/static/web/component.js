@@ -136,7 +136,8 @@ export default {
               })
               .then(response => response.json())
               .then(data => {
-               console.log(data)
+              alert("Game over! You won!")
+               window.href="games.html"
             })
                 .catch(err => console.log(err))
     },
@@ -376,12 +377,10 @@ export default {
             var self = this;
             allCells[i].addEventListener('click', function(e) {
                 console.log(this.id);
-                self.addShip(this.id)
-
+                self.addShip(this.id);
                 var someCells = Array.from(document.getElementsByClassName("hoverShip")).forEach(cell => {
                     cell.classList.remove('hoverShip');
                     cell.classList.add('placedShip');
-
                  });
             });
         }
@@ -498,7 +497,7 @@ export default {
                 cell.innerHTML="afloat";
             }
             if (totalSunk == totalShips){
-                this.gameOver();
+                window.location.href="/web/games.html"
             }
         }
 

@@ -97,6 +97,7 @@ public class SalvoController {
             gamesMap.put("gameHour", each.getGameTime().getHour());
             gamesMap.put("gameMinute", each.getGameTime().getMinute());
             gamesMap.put("gamePlayers", gpObject);
+            gamesMap.put("isFinished", each.getFinished());
             gamesObject.add(gamesMap);
         });
 
@@ -116,7 +117,6 @@ public class SalvoController {
         }
         return finalMapOfGames;
     }
-
 
     @RequestMapping(path = "/CurrentPlayersGames")
     public List<Long> getCurrentPlayersGames(Authentication auth) {
@@ -177,8 +177,6 @@ public class SalvoController {
         playerMap.put("players", playerObj);
         return playerMap;
     }
-
-
 
     @RequestMapping("/gamePlayers")
     public Map<String, Object> getGamePlayers() {
@@ -469,6 +467,8 @@ public class SalvoController {
                                                           @RequestBody Double theScore) {
         GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
         Game currentGame = currentGP.getGame();
+        currentGame.isFinished(true);
+        gamesRepo.save(currentGame);
         Player loggedInPlayer = playersRepo.findUserByUserName(authentication.getName());
 
        Set<GamePlayer> set = new HashSet<>(currentGame.getGamePlayers());
