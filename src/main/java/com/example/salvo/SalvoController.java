@@ -1,11 +1,14 @@
 package com.example.salvo;
 
+import org.apache.tomcat.jni.Time;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -183,7 +186,8 @@ public class SalvoController {
         gamePlayerRepo.findAll().stream().forEach(gamePlaya -> {
             Map<Long, Object> aMap = new HashMap<>();
             aMap.put(gamePlaya.getId(), getShipsfromGamePlayer(gamePlaya) );
-            gamePlayerObj.add(aMap);
+             gamePlayerObj.add(aMap);
+
 //            gamePlayerObj.add(getShipsfromGamePlayer(gamePlaya));
         });
         Map<String, Object> playerMap = new HashMap<>();
@@ -305,9 +309,12 @@ public class SalvoController {
                 salvoesMap.put("turn", turn.getTurn());
                 myObject.add(salvoesMap);
             });
+            Boolean firstPersonToShoot = aGamePlayer.getGameTime().isBefore(Opponent.getGameTime());
+
               Map<String, Object> finalSalvoeMap = new HashMap<>();
                 finalSalvoeMap.put("myTurns", myObject);
                 finalSalvoeMap.put("theirTurns", opponentObject);
+                finalSalvoeMap.put("firstPersonToShoot", firstPersonToShoot);
                 return finalSalvoeMap;
         }
         return makeMapForResponseEntity("error", HttpStatus.FORBIDDEN);
@@ -332,7 +339,7 @@ public class SalvoController {
     @RequestMapping(path = "/games/players/{gamePlayerId}/ships", method=RequestMethod.POST)
      public ResponseEntity<Map<String, Object>> addShips(@PathVariable long gamePlayerId,
                                                           Authentication authentication,
-                                                          @RequestBody Ship sentShip) {
+                                                          @RequestBody Set<Ship> sentShips) {
         // there is no current user logged in, or
         GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
         Player loggedInPlayer = playersRepo.findUserByUserName(authentication.getName());
@@ -351,9 +358,13 @@ public class SalvoController {
          else {
 //             GamePlayer currentGP = gamePlayerRepo.findById(gamePlayerId);
              Map<Object,Object> results = new HashMap<>();
-              currentGP.addShip(sentShip);
-             shipsRepo.save(sentShip);
-             results.put(sentShip.getId(), sentShip.getlocation());
+
+            sentShips.stream().forEach(ship -> {
+                 currentGP.addShip(ship);
+                 shipsRepo.save(ship);
+                 results.put(ship.getId(), ship.getlocation());
+            });
+
             return new ResponseEntity<>(makeMapForResponseEntity("addedShips", results), HttpStatus.CREATED);
         }
     }
@@ -371,11 +382,12 @@ public class SalvoController {
             return new ResponseEntity<>(makeMapForResponseEntity("error", "no such game player"), HttpStatus.UNAUTHORIZED);
 
         //the current user is not the game player the ID references
-        }  else if (getAuthenticatedPlayer(authentication).getGamePlayers().stream().allMatch(
-                gamePlayer -> gamePlayer.getId() == gamePlayerId)
-                  ) {
-            return new ResponseEntity<>(makeMapForResponseEntity("error", "not your game"), HttpStatus.UNAUTHORIZED);
         }
+//        else if (getAuthenticatedPlayer(authentication).getGamePlayers().stream().allMatch(
+//                gamePlayer -> gamePlayer.getId() == gamePlayerId)
+//                  ) {
+//            return new ResponseEntity<>(makeMapForResponseEntity("error", "not your game"), HttpStatus.UNAUTHORIZED);
+//        }
         //add ships
          else {
              GamePlayer currentGP = gamePlayerRepo.getOne(gamePlayerId);
@@ -459,8 +471,24 @@ public class SalvoController {
         Game currentGame = currentGP.getGame();
         Player loggedInPlayer = playersRepo.findUserByUserName(authentication.getName());
 
-        Score newScore = new Score(loggedInPlayer, currentGame, theScore );
-        scoreRepo.save(newScore);
+       Set<GamePlayer> set = new HashSet<>(currentGame.getGamePlayers());
+
+            Set<GamePlayer> filteredSet = new HashSet<>();
+
+		// iterate through the set
+            for (GamePlayer g : set) {
+                // filter languages that start with C
+                if (g.getId() == currentGP.getId()) {
+                } else {
+                    filteredSet.add(g);
+                }
+            }
+        GamePlayer Opponent = filteredSet.iterator().next();
+
+        Score winnerScore = new Score(loggedInPlayer, currentGame, theScore );
+        Score loserScore = new Score(Opponent.getPlayer(), currentGame, 0.0);
+        scoreRepo.save(winnerScore);
+        scoreRepo.save(loserScore);
         return new ResponseEntity<>(makeMapForResponseEntity("sunkenShip", loggedInPlayer.getScore()), HttpStatus.CREATED);
     }
 }

@@ -66,7 +66,18 @@ caption {
     font-weight: bold;
     font-size: 1.5em;
 }
-
+#waiting{
+    position: relative;
+    text-align: center;
+    color: white;
+}
+.top-left {
+  position: absolute;
+  margin: 0px;
+  top: 0px;
+  left: 8%;
+  text-align: center;
+}
 .hoverCell:hover{
      background-image: url("https://a.wattpad.com/useravatar/target.256.882874.jpg");
       background-size: contain;

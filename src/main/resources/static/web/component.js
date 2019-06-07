@@ -38,9 +38,14 @@ export default {
 
                 <br>
               <button type="button" id="confirm" v-on:click="confirm"> confirm ships </button>
+               <button type="button" id="reset" v-on:click="reset"> reset ship placement </button>
         </form>
         <div id="shotSelector" v-else-if="isNewGame == false">
-            <h1 v-if="yourTurn">waiting on opponent to shoot </h1>
+            <div id="waiting" v-if="yourTurn">
+                <img src="https://i.imgur.com/NLPrNgm.gif" width="480" height="270">
+                <h1 class="top-left">waiting for opponent to shoot</h1>
+
+             </div>
             <div v-else>
                <ul id="list">
                </ul>
@@ -67,7 +72,8 @@ export default {
                {shipTypeName: "Destoryer", shipsLength: 4},
                {shipTypeName: "Aircraft Carrier", shipsLength: 5},
       ],
-      selectedShots: '',
+      emptyArray: [],
+    selectedShots: '',
       picked: 'Right',
       isNewGame: true,
       shot: null,
@@ -112,6 +118,10 @@ export default {
     deleteItem: function(index){
             this.$delete(this.items,index);
     },
+    reset: function(){
+        this.emptyArray=[];
+        this.makeGameView();
+    },
     gameOver: function(){
         alert("GAME OVER !!!!!!");
         var selected = this.selected;
@@ -142,10 +152,18 @@ export default {
               })
               .then(response => response.json())
               .then(data => {
-                if (data.myTurns.length !== data.theirTurns.length){
-                    this.yourTurn=true;
-                } else {
+               console.log(data.firstPersonToShoot);
+               var didYouStart = data.firstPersonToShoot;
+                if (data.myTurns.length < data.theirTurns.length){
                     this.yourTurn=false;
+                } else if (data.myTurns.length > data.theirTurns.length){
+                    this.yourTurn=true;
+                } else if (data.myTurns.length == data.theirTurns.length){
+                    if (didYouStart){
+                        this.yourTurn=false;
+                    } else {
+                        this.yourTurn=true;
+                    }
                 }
                 this.turn = data.myTurns.length;
                  })
@@ -207,7 +225,7 @@ export default {
                 var currentTurn = this.turn+1;
                 var anObject =  { "turn": currentTurn, "location": newArrayOfShots };
                 var selected = this.selected;
-
+                console.log(anObject)
                fetch('/api/games/players/' + selected + '/salvoes', {
                   credentials: 'include',
                   method: 'POST',
@@ -266,7 +284,24 @@ export default {
     },
 
     confirm: function(){
-             location.reload();
+              var sampleObject = this.emptyArray;
+
+            fetch('/api/games/players/' + this.selected + '/ships', {
+                  credentials: 'include',
+                  method: 'POST',
+                  headers: {
+                      'Accept': 'application/json',
+                      'Content-Type': 'application/json'
+                  },
+                body: JSON.stringify(sampleObject)
+//                body: JSON.stringify(anObject)
+              })
+              .then(response => response.json())
+              .then(function(data) {
+                console.log(data);
+                location.reload();
+            })
+                .catch(err => console.log(err))
     },
 
     addShip: function (){
@@ -282,21 +317,7 @@ export default {
             shipTypeText = "Aircraft Carrier"
         }
         var anObject =  { "shipType": shipTypeText, "location": this.coordinates };
-            fetch('/api/games/players/' + this.selected + '/ships', {
-                  credentials: 'include',
-                  method: 'POST',
-                  headers: {
-                      'Accept': 'application/json',
-                      'Content-Type': 'application/json'
-                  },
-//                body: JSON.stringify(sampleObject)
-                body: JSON.stringify(anObject)
-              })
-              .then(response => response.json())
-              .then(function(data) {
-                console.log(data);
-            })
-                .catch(err => console.log(err))
+        this.emptyArray.push(anObject);
     },
 
     emptyGrid: function(){
@@ -356,6 +377,7 @@ export default {
             allCells[i].addEventListener('click', function(e) {
                 console.log(this.id);
                 self.addShip(this.id)
+
                 var someCells = Array.from(document.getElementsByClassName("hoverShip")).forEach(cell => {
                     cell.classList.remove('hoverShip');
                     cell.classList.add('placedShip');
