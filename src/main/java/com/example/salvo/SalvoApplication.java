@@ -1,6 +1,5 @@
 package com.example.salvo;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,12 +13,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
-
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 import org.springframework.security.web.WebAttributes;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -31,12 +27,16 @@ public class SalvoApplication {
     public static void main(String[] args) {
         SpringApplication.run(SalvoApplication.class, args);
     }
-
+    // initialize application with a serires of repositories
     @Bean
     public CommandLineRunner initData(PlayerRepository playersRepo, GameRepository gamesRepo, GamePlayerRepository gamePlayerRepo,
                                       ShipRepository shipsRepo, SalvoRepository salvoeRepo, ScoreRepository scoreRepo) {
         return (args) -> {
 
+            // base level player data to use for production. Comment out data to start a server without any data.
+
+            // Data includes creating players (w/ username and passwords), games, gameplayers (an instance of a player in a game),
+            // ships, and shot locations.
             Player p1 = new Player("Jack");
             Player p2 = new Player("Chloe");
             Player p3 = new Player("Kim");
@@ -177,10 +177,13 @@ public class SalvoApplication {
     }
 }
 
+
+// SECURITY SECTION
 @EnableWebSecurity
 @Configuration
 class WebSecurityConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
+    // inject playersrepo dependencies
     @Autowired
     PlayerRepository playersRepo;
 
@@ -188,10 +191,13 @@ class WebSecurityConfiguration extends GlobalAuthenticationConfigurerAdapter {
     public void init(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(inputName-> {
             Player player = playersRepo.findUserByUserName(inputName);
+            // checks to see if player logging in exists
             if (player != null) {
                 return new User(player.getuserName(), player.getPassword(),
+                        // designates the player as a User, rather than an admin
                         AuthorityUtils.createAuthorityList("USER"));
             } else {
+                //throw error for wrong username
                 throw new UsernameNotFoundException("Unknown user: " + inputName);
             }
         });
@@ -205,6 +211,7 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
+                // give user access to all of the neccessary game files and api routes
             .antMatchers("/web/games.html").permitAll()
             .antMatchers("/web/games.css").permitAll()
             .antMatchers("/web/games.js").permitAll()
@@ -230,7 +237,6 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.logout()
             .logoutUrl("/api/logout");
 
-
         // turn off checking for CSRF tokens
         http.csrf().disable();
 
@@ -253,8 +259,6 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
         }
     }
-
-
 }
 
 
