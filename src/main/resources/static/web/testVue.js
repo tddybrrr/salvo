@@ -12,6 +12,7 @@ new Vue({
   components: {
     SingleFileComponent
   },
+  // when the component is created, get information about all the games.
   created(){
         fetch('/api/games', {
               credentials: 'include',
@@ -32,14 +33,15 @@ new Vue({
           .catch(err => console.log(err))
   },
   methods: {
+    // update the data field for a players credentials, to be used in the login function below
     createCredentials: function(){
         let loginCredentials = 'userName=' + this.un + '&password=' + this.pw;
         this.credentials = loginCredentials;
     },
 
     testLogin: function(){
+       // attempt to fetch information about logged in players
       var loginCredentials = this.credentials;
-
       fetch('/api/login', {
               credentials: 'include',
               method: 'POST',
@@ -48,10 +50,10 @@ new Vue({
                   'Content-Type': 'application/x-www-form-urlencoded'
               },
             body: loginCredentials
-//              body: 'userName=' + form[0].value + '&password=' + form[1].value
           })
           .then(response => {
               if(response.ok){
+              // if correct credentials, reload the page to render new information
                   this.loggedIn=true;
                     location.reload();
               } else {
@@ -62,7 +64,7 @@ new Vue({
     },
     testSignup: function(){
       var loginCredentials = this.credentials;
-
+        // post request with an object of the given username/password of a new user
         fetch('/api/players', {
               credentials: 'include',
               method: 'POST',
@@ -78,6 +80,8 @@ new Vue({
               if (Object.keys(response)[0] == "error"){
                     alert(response.error);
               } else {
+              // if the username isnt taken and there is no error, try to login
+              // with the same credentials given. This function also reloads the page
                   this.testLogin();
               }
           })
@@ -95,8 +99,8 @@ new Vue({
           .then(response => {
               console.log(response);
               if(response.ok){
-//                document.location.reload(true);
-                 alert("logged out!");
+              // tell the player that they were successfully logged out
+=                 alert("logged out!");
                  this.loggedIn=false;
               }
           })
