@@ -139,35 +139,6 @@ function testLogout(){
 
 //-----------------------------------------------------------------------------------
 
-function addShip(){
-//
-//    var type = document.getElementById('shipTypeSelector');
-//    var value = selector.value;
-//    console.log(value);
-//    var selector = document.getElementById('shipDirection');
-//    var value = selector.value;
-//    console.log(value);
-//    var sampleObject =  { "shipType": "patrolBoat", "location": ["h5", "h6"] }
-//
-//
-//    var gamePlayerId = 5;
-//
-//    fetch('/api/games/players/' + gamePlayerId + '/ships', {
-//          credentials: 'include',
-//          method: 'POST',
-//          headers: {
-//              'Accept': 'application/json',
-//              'Content-Type': 'application/json'
-//          },
-//        body: JSON.stringify(sampleObject)
-//      })
-//      .then(response => response.json())
-//      .then(function(data) {
-//        console.log(data);
-//        alert(data.error);
-//    })
-//        .catch(err => console.log(err))
-}
 
 function fetchData(gpNum){
 

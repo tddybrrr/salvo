@@ -1,5 +1,8 @@
 
+// this code helps populate the public leaderboards page. If a player is logged in, it allows extra functionality to join, create, and view games
+// based on their permissions
 
+// build simple table with each player's record and scores
 function buildLeaderBoard(scores){
 
      var table = document.getElementById("leaderBoard");
@@ -32,6 +35,7 @@ function buildLeaderBoard(scores){
       cell.innerHTML="Total score"
 }
 
+// function to create a new, empty game by clicking a button.
 function createGame(){
       fetch("http://localhost:8080/api/games", {
            credentials: 'include',
@@ -53,7 +57,8 @@ function createGame(){
         .catch(err => console.log(err))
 }
 
-
+// function to create a list of ongoing games, their players, and a button to join or view that game,
+// depending on the logged-in player's permissions.
 function buildOverview(games){
 
      var table = document.getElementById("gamesOverview");
@@ -126,6 +131,7 @@ function buildOverview(games){
     }
 
 
+// function to handle a player that wants to join a game
 function joinGame(gameID){
 
     fetch("http://localhost:8080/api/game/" + gameID + "/players", {
@@ -138,6 +144,7 @@ function joinGame(gameID){
       })
       .then(response =>  response.json())
       .then(data => {
+            // conditionals handle the reponse depending on if the game is available to the user.
             if (data.error === "game is full"){
                alert(data.error);
             } else if (data.error === "no such game") {
@@ -167,6 +174,7 @@ fetch( "http://localhost:8080/api/games",{
         console.log( "Request failed: " + error.message );
 });
 
+// same logout button functionality that exists on the game-view html page
 function logout(){
       fetch('/api/logout', {
               credentials: 'include',
